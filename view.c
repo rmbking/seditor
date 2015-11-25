@@ -2,15 +2,15 @@
 void clear_screen()
 {
 #ifdef LINUX
-	system("echo $PS1 >tmp/ps");
-	system("export PS1=\"\"");
+//	system("echo $PS1 >tmp/ps");
+//	system("export PS1=\"\"");
 	system("clear");
 #endif
 }
 void recover_screen()
 {
 #ifdef LINUX
-	system("export PS1=`cat tmp/ps`");
+//	system("export PS1=`cat tmp/ps`");
 #endif
 }
 void mouse_hide()

@@ -1,8 +1,8 @@
 CC=gcc
-all:*.c *.h
-	mkdir tmp
-	$(CC) -c *.c -o *.o
-	$(CC) *.o -o seditor
+all: *.h *.c
+	$(CC) -o view.o -c view.c
+	$(CC) -o seditor view.o
 clean:
 	rm *.o
 	rm seditor
+
