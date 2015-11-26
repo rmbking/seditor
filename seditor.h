@@ -16,4 +16,9 @@
 #define BOTH 3
 #define NEW 4
 
+#define EXIT 0
+#define VIEW_MODE 1
+#define EDIT_MODE 2
+#define CONTROL_MODE 4
+
 #endif

@@ -30,13 +30,16 @@ int kb_recover()
 	}
 	return SUCCESS;
 }
-int kv_input()
+int kb_input()
+//int main()
 {
 	char cmd = '0';
 	if(kb_init() == FAILURE)	
 		return FAILURE;
 	if(read(0,&cmd,1))
+	{			
+		if(kb_recover() == FAILURE)
+			return FAILURE;
 		return cmd;
-	if(kb_recover() == FAILURE)
-		return FAILURE;
+	}
 }

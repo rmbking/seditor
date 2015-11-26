@@ -9,5 +9,6 @@
 #define FAILURE -1
 extern int kb_init();
 extern int kb_recover();
+extern int kb_input();
 
 #endif

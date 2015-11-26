@@ -1,16 +1,9 @@
 #include "seditor.h"
+#include "kbhit.h"
 void clear_screen()
 {
 #ifdef LINUX
-//	system("echo $PS1 >tmp/ps");
-//	system("export PS1=\"\"");
 	system("clear");
-#endif
-}
-void recover_screen()
-{
-#ifdef LINUX
-//	system("export PS1=`cat tmp/ps`");
 #endif
 }
 void mouse_hide()
@@ -25,6 +18,28 @@ void mouse_show()
 	system("echo  \"\\033[?25h\"");
 #endif
 }
+int view()
+{
+	char cmd;
+	while(cmd = kb_input())
+	{
+		if(cmd == FAILURE)
+		{
+			printf("Something is wrong the keyboard.\n");
+			exit(2);
+		}
+		switch(cmd)
+		{
+			case 'i':kb_recover();return EDIT_MODE;	
+			case 'q':kb_recover();return EXIT;
+			default:printf("%c is not a valid operation.\n",cmd);
+		}
+	}
+}
+int edit()
+{}
+int control()
+{}
 void check(int *mode,char * path)
 {
 	struct stat file_info;
@@ -62,20 +77,20 @@ void check(int *mode,char * path)
 
 
 }
-void process(char cmd)
+void process()
 {
-	if(cmd == 'q'){
-		recover_screen();
-		mouse_show();
-		exit(0);
+	int mode = VIEW_MODE;
+	while(mode != EXIT)
+	{
+		switch(mode)
+		{
+			case VIEW_MODE:mode = view();break;
+			case EDIT_MODE:mode = edit();break;
+			case CONTROL_MODE:mode = control();break;
+			case EXIT:break;
+			default: printf("[view.c][process]:error,invalid mode.");
+		}
 	}
-	if(cmd == 'i'){
-		mouse_show();
-	}
-	if(cmd == 27){
-		mouse_hide();
-	}
-
 }
 int main(int argc,char *argv[])
 {
@@ -83,7 +98,6 @@ int main(int argc,char *argv[])
 	char *path;
 	int mode = 0;
 	char word;
-	char cmd;
 
 	path = argv[1];
 	check(&mode,path);
@@ -98,14 +112,10 @@ int main(int argc,char *argv[])
 		fp = fopen(path,"r+");
 	
 	clear_screen();	
-	
 	while((word = fgetc(fp)) != EOF)
 		putchar(word);
-	printf("end!\n");
 	mouse_hide();
-	fflush(stdin);
-	while(cmd = getchar())
-		process(cmd);
-
+	process();
+	mouse_show();
 	return 0;
 }
