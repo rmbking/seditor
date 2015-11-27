@@ -21,4 +21,7 @@
 #define EDIT_MODE 2
 #define CONTROL_MODE 4
 
+#define SUCCESS 0
+#define FAILURE -1
+
 #endif
