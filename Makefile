@@ -1,8 +1,10 @@
 CC=gcc
-all: *.h *.c
-	$(CC) -o view.o -c view.c
-	$(CC) -o kbhit.o -c kbhit.c
-	$(CC) -o seditor view.o	kbhit.o
+OBJ = main.o kbhit.o
+HEAD = kbhit.h seditor.h
+all: $(OBJ)
+	$(CC) -o seditor $(OBJ)
+%.o:%.c $(HEAD) 
+	$(CC) -o  $@ -c $<
 clean:
 	rm *.o
 	rm seditor
