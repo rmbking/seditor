@@ -1,4 +1,5 @@
 #include "kbhit.h"
+#include "main.h"
 #include <stdio.h>
 struct termios save,new;
 int  kb_init()

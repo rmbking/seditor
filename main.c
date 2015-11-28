@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "main.h"
 #include "kbhit.h"
+#include "cursor.h"
 void clear_screen()
 {
 #ifdef LINUX
@@ -10,14 +11,18 @@ void clear_screen()
 void mouse_hide()
 {
 #ifdef LINUX
-	system("echo  \"\\033[?25l\"");
+	printf("\033[?25l");
 #endif
 }
 void mouse_show()
 {
 #ifdef LINUX
-	system("echo  \"\\033[?25h\"");
+	printf("\033[?25h");
 #endif
+}
+void curse_still()
+{
+
 }
 int edit()
 {}
@@ -97,8 +102,7 @@ int main(int argc,char *argv[])
 	clear_screen();	
 	while((word = fgetc(fp)) != EOF)
 		putchar(word);
-	mouse_hide();
 	process();
-	mouse_show();
+	clear_screen();
 	return 0;
 }
