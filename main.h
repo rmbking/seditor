@@ -23,5 +23,5 @@
 
 #define SUCCESS 0
 #define FAILURE -1
-
+extern FILE *FP;
 #endif

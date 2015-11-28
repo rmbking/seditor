@@ -16,4 +16,6 @@
 #define CURSOR_DOWN() printf("\033[1B");fflush(stdout);
 #define CURSOR_LEFT() printf("\033[1D");fflush(stdout);
 #define CURSOR_RIGHT() printf("\033[1C");fflush(stdout);
+
+#define CURSOR_MOVE(X,Y) printf("\033[%d;%d",X,Y);fflush(stdout);
 #endif

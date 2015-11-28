@@ -2,9 +2,17 @@
 #include "view.h"
 #include "main.h"
 #include "cursor.h"
+static void display()
+{
+	char word;
+	while((word = fgetc(FP)) != EOF)
+		putchar(word);
+}
 int view()
 {
+
 	char cmd;
+	display();
     while(cmd = kb_input())
     {
     	if(cmd == FAILURE)

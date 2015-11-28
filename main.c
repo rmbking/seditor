@@ -2,6 +2,9 @@
 #include "main.h"
 #include "kbhit.h"
 #include "cursor.h"
+
+FILE *FP;
+
 void clear_screen()
 {
 #ifdef LINUX
@@ -82,10 +85,8 @@ void process()
 }
 int main(int argc,char *argv[])
 {
-	FILE *fp;
 	char *path;
 	int mode = 0;
-	char word;
 
 	path = argv[1];
 	check(&mode,path);
@@ -95,13 +96,11 @@ int main(int argc,char *argv[])
 		exit(1);
 	}
 	if(mode == READ)
-		fp = fopen(path,"r");
+		FP = fopen(path,"r");
 	if(mode == BOTH || mode ==NEW)
-		fp = fopen(path,"r+");
+		FP = fopen(path,"r+");
 	
 	clear_screen();	
-	while((word = fgetc(fp)) != EOF)
-		putchar(word);
 	process();
 	clear_screen();
 	return 0;
