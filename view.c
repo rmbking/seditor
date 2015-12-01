@@ -20,22 +20,34 @@ void update_pos(char tmp,int *row,int *col)
 			(*col)++;
 	}
 }
-static void display()
+static void display(int start_line)
 {
 	char word;
+	int start;
 	int row,col;
 	int cur_row,cur_col;
+	fseek(FP,0,SEEK_SET);
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
 	row = win.ws_row;
 	col = win.ws_col;
 	cur_row = 1;
-	cur_col = 0;
+	cur_col = 1;
+	start = 0;
+	clear_screen();
+	CURSOR_MOVE(1,1);
 	while(1)
 	{
 		word = EOF;
-		if((word = fgetc(FP)) != EOF)
+		/*locate the first output line and set out flag*/
+		if(cur_row == start_line && start  == 0)
+		{
+			cur_row = 1;
+			cur_col = 1;
+			start = 1;
+		}
+		if(((word = fgetc(FP)) != EOF) && start)
 			putchar(word);
-		else if(cur_row < row)
+		else if(cur_row < row && start)
 		{
 			printf("~\n");
 			cur_row++;
@@ -50,13 +62,16 @@ static void display()
 		if(cur_row == row)
 			break;
 	}
-	CURSOR_MOVE(1,1);
 }
 int view()
 {
 
 	char cmd;
-	display();
+	display(1);
+	CURSOR_MOVE(1,1);
+	cur_line = 1;
+	cur_pos = 1;
+	int start_line = 1;
     while(cmd = kb_input())
     {
     	if(cmd == FAILURE)
@@ -68,9 +83,39 @@ int view()
         {
         	case 'i':return EDIT_MODE;
 
-			case 'h':CURSOR_LEFT();break;
-			case 'j':CURSOR_DOWN();break;
-			case 'k':CURSOR_UP();break;
+			case 'h':
+					 CURSOR_LEFT();
+					 if(cur_pos >1)
+						 cur_pos--;
+					 break;
+			case 'j':
+					 if(cur_line < win.ws_row - 1)
+					 {
+						 cur_line ++;
+				   	 	CURSOR_DOWN();
+					 }
+					 else
+					 {
+						 //*****************************
+							start_line++; 
+							display(start_line);
+					 }
+					 break;
+			case 'k':
+					 if(cur_line > 1)
+					 {
+						 cur_line --;
+					 	CURSOR_UP();
+					 }
+					 else
+					 {
+						 if(start_line > 1)
+						 {
+						 	start_line--;
+						 	display(start_line);
+						 }
+					 }
+					 break;
 			case 'l':CURSOR_RIGHT();break;
             default:break;
 		}
