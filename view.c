@@ -7,6 +7,7 @@ static void display()
 	char word;
 	while((word = fgetc(FP)) != EOF)
 		putchar(word);
+	CURSOR_MOVE(1,1);
 }
 int view()
 {
@@ -28,7 +29,7 @@ int view()
 			case 'j':CURSOR_DOWN();break;
 			case 'k':CURSOR_UP();break;
 			case 'l':CURSOR_RIGHT();break;
-            default:printf("%c is not a valid operation.\n",cmd);
+            default:break;
 		}
 	}
 }

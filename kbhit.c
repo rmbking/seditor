@@ -34,13 +34,29 @@ int kb_recover()
 int kb_input()
 //int main()
 {
-	char cmd = '0';
+	char cmd[10];
+	int nReturn;
 	if(kb_init() == FAILURE)	
 		return FAILURE;
-	if(read(0,&cmd,1))
+	if(nReturn = read(0,&cmd,3))
 	{			
 		if(kb_recover() == FAILURE)
 			return FAILURE;
-		return cmd;
+		if(nReturn == 1)
+			return cmd[0];
+		else if(nReturn == 3)
+		{
+			if(cmd[0] == '\033' && cmd[1] == '[')
+			{
+				switch(cmd[2])
+				{
+					case 'A':return 'k';
+					case 'B':return 'j';
+					case 'C':return 'l';
+					case 'D':return 'h';
+					default:return cmd[2];
+				}
+			}
+		}
 	}
 }
