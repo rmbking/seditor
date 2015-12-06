@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <termios.h>
+#include "kbhit.h"
 #include "view.h"
 #include "main.h"
 #include "cursor.h"
@@ -20,12 +21,35 @@ void update_pos(char tmp,int *row,int *col)
 			(*col)++;
 	}
 }
+void state_init()
+{
+	char word;
+	int row,col;
+	int cur_row,cur_col;
+	int line = 1;
+	fseek(FP,0,SEEK_SET);
+	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
+	row = win.ws_row;
+	col = win.ws_col;
+	clear_screen();
+	CURSOR_MOVE(1,1);
+	while((word = fgetc(FP)) != EOF)
+	{
+		cursor_locate(&cur_row,&cur_col);
+		putchar(word);
+		if( cur_col == 1)		
+			line++;		
+	}
+	cur_state.total_line = line-1;
+	clear_screen();
+}
 static void display(int start_line)
 {
 	char word;
 	int start;
 	int row,col;
 	int cur_row,cur_col;
+	clear_screen();
 	fseek(FP,0,SEEK_SET);
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
 	row = win.ws_row;
@@ -33,7 +57,6 @@ static void display(int start_line)
 	cur_row = 1;
 	cur_col = 1;
 	start = 0;
-	clear_screen();
 	CURSOR_MOVE(1,1);
 	while(1)
 	{
@@ -67,6 +90,8 @@ int view()
 {
 
 	char cmd;
+	int row,col;
+	state_init();
 	display(1);
 	CURSOR_MOVE(1,1);
 	cur_line = 1;
@@ -96,9 +121,11 @@ int view()
 					 }
 					 else
 					 {
-						 //*****************************
+						 if(start_line + win.ws_row - 2 < cur_state.total_line )
+						 {
 							start_line++; 
 							display(start_line);
+						 }
 					 }
 					 break;
 			case 'k':
@@ -113,10 +140,13 @@ int view()
 						 {
 						 	start_line--;
 						 	display(start_line);
+							CURSOR_MOVE(1,1);
 						 }
 					 }
 					 break;
 			case 'l':CURSOR_RIGHT();break;
+			case 's':cursor_locate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
+			case 'w':printf("%d %d ",win.ws_row,win.ws_col);
             default:break;
 		}
 	}

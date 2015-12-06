@@ -1,5 +1,5 @@
-#ifndef SEDITOR_H
-#define SEDITOR_H
+#ifndef MAIN_H
+#define MAIN_H
 
 #define LINUX
 #include <stdio.h>
@@ -23,5 +23,13 @@
 
 #define SUCCESS 0
 #define FAILURE -1
+struct state{
+	int total_line;
+	int start_line;
+	int cur_row;
+	int cur_col;
+	int line_endpos[100];	
+};
 extern FILE *FP;
+extern struct state cur_state;
 #endif

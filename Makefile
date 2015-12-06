@@ -2,10 +2,10 @@ CC=gcc
 OBJ = main.o kbhit.o view.o
 HEAD = kbhit.h main.h cursor.h
 all: $(OBJ)
-	$(CC) -o seditor  $(OBJ)
+	$(CC) -o seditor -g $(OBJ)
 %.o:%.c $(HEAD) 
-	$(CC) -o  $@ -c $<	
+	$(CC) -o  $@ -c $< -g	
 clean:
-	rm *.o
-	rm seditor
+	-rm *.o
+	-rm seditor
 

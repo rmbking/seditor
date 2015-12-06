@@ -4,7 +4,7 @@
 #include "cursor.h"
 
 FILE *FP;
-
+struct state cur_state;
 void clear_screen()
 {
 #ifdef LINUX
