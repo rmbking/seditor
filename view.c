@@ -28,20 +28,31 @@ void state_init()
 	int cur_row,cur_col;
 	int line = 1;
 	fseek(FP,0,SEEK_SET);
+	/*
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
 	row = win.ws_row;
 	col = win.ws_col;
 	clear_screen();
 	CURSOR_MOVE(1,1);
+	*/
 	while((word = fgetc(FP)) != EOF)
 	{
-		cursor_locate(&cur_row,&cur_col);
+		if(word == '\n')
+		{
+			/*
+			cursor_locate(&cur_row,&cur_col);
+			cur_state.line_endpos[line] = cur_col;
+			*/
+			line++;
+		}
+		/*
 		putchar(word);
-		if( cur_col == 1)		
-			line++;		
+		*/
 	}
 	cur_state.total_line = line-1;
+	/*
 	clear_screen();
+	*/
 }
 static void display(int start_line)
 {
@@ -64,12 +75,19 @@ static void display(int start_line)
 		/*locate the first output line and set out flag*/
 		if(cur_row == start_line && start  == 0)
 		{
+			start_line = 0;		//fix the bug when the start_line reaches the same line as screen rows.
 			cur_row = 1;
 			cur_col = 1;
 			start = 1;
 		}
 		if(((word = fgetc(FP)) != EOF) && start)
+		{
 			putchar(word);
+			if(start_line > 40)
+				system("touch success");
+
+			fflush(stdout);
+		}
 		else if(cur_row < row && start)
 		{
 			printf("~\n");
@@ -82,7 +100,7 @@ static void display(int start_line)
 			cur_col = 1;
 			cur_row++;
 		}
-		if(cur_row == row)
+		if(cur_row == row && !start_line)		//add the latter condition to fix the bug as above
 			break;
 	}
 }
@@ -92,6 +110,10 @@ int view()
 	char cmd;
 	int row,col;
 	state_init();
+	/*just for debug
+	printf("%d\n",cur_state.total_line);
+	sleep(5);
+	*/
 	display(1);
 	CURSOR_MOVE(1,1);
 	cur_line = 1;
@@ -151,4 +173,3 @@ int view()
 		}
 	}
 }
-
