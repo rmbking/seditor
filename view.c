@@ -63,8 +63,8 @@ static void display(int start_line)
 	clear_screen();
 	fseek(FP,0,SEEK_SET);
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
-	row = win.ws_row;
-	col = win.ws_col;
+	cur_state.win_height = win.ws_row;
+	cur_state.win_width = win.ws_col;
 	cur_row = 1;
 	cur_col = 1;
 	start = 0;
@@ -88,19 +88,19 @@ static void display(int start_line)
 
 			fflush(stdout);
 		}
-		else if(cur_row < row && start)
+		else if(cur_row < cur_state.win_height && start)
 		{
 			printf("~\n");
 			cur_row++;
 		}
 		update_pos(word,&cur_row,&cur_col);
-		if(cur_col > col )
+		if(cur_col > cur_state.win_width )
 		{
 			char_num_of_line[cur_row] = cur_col - 1;
 			cur_col = 1;
 			cur_row++;
 		}
-		if(cur_row == row && !start_line)		//add the latter condition to fix the bug as above
+		if(cur_row == cur_state.win_height && !start_line)		//add the latter condition to fix the bug as above
 			break;
 	}
 }
@@ -136,14 +136,14 @@ int view()
 						 cur_pos--;
 					 break;
 			case 'j':
-					 if(cur_line < win.ws_row - 1)
+					 if(cur_line < cur_state.win_height - 1)
 					 {
 						 cur_line ++;
 				   	 	CURSOR_DOWN();
 					 }
 					 else
 					 {
-						 if(start_line + win.ws_row - 2 < cur_state.total_line )
+						 if(start_line + cur_state.win_height - 2 < cur_state.total_line )
 						 {
 							start_line++; 
 							display(start_line);

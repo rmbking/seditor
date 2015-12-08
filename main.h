@@ -26,6 +26,8 @@
 struct state{
 	int total_line;
 	int start_line;
+	int win_height;
+	int win_width;
 	int cur_row;
 	int cur_col;
 	int line_endpos[100];	
