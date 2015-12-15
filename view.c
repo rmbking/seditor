@@ -7,13 +7,11 @@
 int  cur_line;
 int  cur_pos; 
 int  total_line;
-int  char_num_of_line[100];
 struct winsize win;
 void update_pos(char tmp,int *row,int *col)
 {
 	switch(tmp){
 		case '\n':
-			char_num_of_line[*row] = *col;
 			(*row) ++;
 			*col = 1;
 			break;
@@ -96,7 +94,6 @@ static void display(int start_line)
 		update_pos(word,&cur_row,&cur_col);
 		if(cur_col > cur_state.win_width )
 		{
-			char_num_of_line[cur_row] = cur_col - 1;
 			cur_col = 1;
 			cur_row++;
 		}
@@ -147,6 +144,7 @@ int view()
 						 {
 							start_line++; 
 							display(start_line);
+							CURSOR_MOVE(cur_state.win_height-1,1);
 						 }
 					 }
 					 break;

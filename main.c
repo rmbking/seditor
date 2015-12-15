@@ -8,7 +8,7 @@ struct state cur_state;
 void clear_screen()
 {
 #ifdef LINUX
-	system("clear");
+	printf("\033[2J\033[1;1H");
 #endif
 }
 void mouse_hide()
