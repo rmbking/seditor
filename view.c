@@ -115,7 +115,7 @@ int view()
 	CURSOR_MOVE(1,1);
 	cur_line = 1;
 	cur_pos = 1;
-	int start_line = 1;
+	cur_state.start_line = 1;
     while(cmd = kb_input())
     {
     	if(cmd == FAILURE)
@@ -140,10 +140,10 @@ int view()
 					 }
 					 else
 					 {
-						 if(start_line + cur_state.win_height - 2 < cur_state.total_line )
+						 if(cur_state.start_line + cur_state.win_height - 2 < cur_state.total_line )
 						 {
-							start_line++; 
-							display(start_line);
+							cur_state.start_line++; 
+							display(cur_state.start_line);
 							CURSOR_MOVE(cur_state.win_height-1,1);
 						 }
 					 }
@@ -156,15 +156,45 @@ int view()
 					 }
 					 else
 					 {
-						 if(start_line > 1)
+						 if(cur_state.start_line > 1)
 						 {
-						 	start_line--;
-						 	display(start_line);
+						 	cur_state.start_line--;
+						 	display(cur_state.start_line);
 							CURSOR_MOVE(1,1);
 						 }
 					 }
 					 break;
 			case 'l':CURSOR_RIGHT();break;
+			case Ctl('f'):
+						cur_state.start_line += cur_state.win_height - 2; 
+						if(cur_state.start_line > cur_state.total_line - cur_state.win_height + 2) 
+							 cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
+						display(cur_state.start_line);
+						CURSOR_MOVE(1,1);
+						cur_line = 1;
+						break;
+
+			case Ctl('b'):
+						cur_state.start_line -= cur_state.win_height - 2;
+						if(cur_state.start_line <= 0)
+							cur_state.start_line = 1;
+						display(cur_state.start_line);
+						CURSOR_MOVE(cur_state.win_height-1,1);
+						cur_line = cur_state.win_height - 1;
+						break;
+			case 'H':
+						CURSOR_MOVE(1,1);
+						cur_line = 1;
+						break;
+			case 'M':
+						CURSOR_MOVE(cur_state.win_height/2,1);
+						cur_line = cur_state.win_height/2;
+						break;
+			case 'L':
+						CURSOR_MOVE(cur_state.win_height - 1,1);
+						cur_line = cur_state.win_height - 1;
+						break;
+
 			case 's':cursor_locate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
 			case 'w':printf("%d %d ",win.ws_row,win.ws_col);
             default:break;

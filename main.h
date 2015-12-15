@@ -23,6 +23,8 @@
 
 #define SUCCESS 0
 #define FAILURE -1
+
+#define Ctl(x) (x - 'a' + 1)
 struct state{
 	int total_line;
 	int start_line;
