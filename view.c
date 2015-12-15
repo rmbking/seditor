@@ -182,6 +182,24 @@ int view()
 						CURSOR_MOVE(cur_state.win_height-1,1);
 						cur_line = cur_state.win_height - 1;
 						break;
+			
+			case Ctl('d'):
+						cur_state.start_line += cur_state.win_height/2 - 1; 
+						if(cur_state.start_line > cur_state.total_line - cur_state.win_height + 2) 
+							 cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
+						display(cur_state.start_line);
+						CURSOR_MOVE(1,1);
+						cur_line = 1;
+						break;
+
+			case Ctl('u'):
+						cur_state.start_line -= cur_state.win_height/2 - 1;
+						if(cur_state.start_line <= 0)
+							cur_state.start_line = 1;
+						display(cur_state.start_line);
+						CURSOR_MOVE(cur_state.win_height-1,1);
+						cur_line = cur_state.win_height - 1;
+						break;
 			case 'H':
 						CURSOR_MOVE(1,1);
 						cur_line = 1;
