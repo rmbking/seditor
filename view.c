@@ -19,38 +19,39 @@ void update_pos(char tmp,int *row,int *col)
 			(*col)++;
 	}
 }
+void next(char c,int *row,int *col)
+{
+	if(c == 't') 
+		*col += (TABLEN - *col % TABLEN + 1) % (TABLEN + 1);
+	else if(c == '\n') {
+		*col = 1;
+		(*row) ++;
+	}
+	else
+		(*col)++;
+	if(*col > cur_state.win_width)
+	{
+		*col -= cur_state.win_width;
+		(*row) ++;
+	}
+}
 void state_init()
 {
 	char word;
-	int row,col;
 	int cur_row,cur_col;
-	int line = 1;
+
+	cur_row = 1;
+	cur_col = 1;
+
 	fseek(FP,0,SEEK_SET);
-	/*
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
-	row = win.ws_row;
-	col = win.ws_col;
-	clear_screen();
-	CURSOR_MOVE(1,1);
-	*/
+	cur_state.win_height = win.ws_row;
+	cur_state.win_width = win.ws_col;
+
 	while((word = fgetc(FP)) != EOF)
-	{
-		if(word == '\n')
-		{
-			/*
-			cursor_locate(&cur_row,&cur_col);
-			cur_state.line_endpos[line] = cur_col;
-			*/
-			line++;
-		}
-		/*
-		putchar(word);
-		*/
-	}
-	cur_state.total_line = line-1;
-	/*
-	clear_screen();
-	*/
+		next(word,&cur_row,&cur_col);
+
+	cur_state.total_line =cur_row-1;
 }
 static void display(int start_line)
 {
@@ -81,10 +82,6 @@ static void display(int start_line)
 		if(((word = fgetc(FP)) != EOF) && start)
 		{
 			putchar(word);
-			if(start_line > 40)
-				system("touch success");
-
-			fflush(stdout);
 		}
 		else if(cur_row < cur_state.win_height && start)
 		{
@@ -126,6 +123,10 @@ int view()
         switch(cmd)
         {
         	case 'i':return EDIT_MODE;
+			case ':':
+					 CURSOR_MOVE(cur_state.win_height,1);
+					 putchar(':');
+					 return CONTROL_MODE;
 
 			case 'h':
 					 CURSOR_LEFT();
@@ -214,7 +215,8 @@ int view()
 						break;
 
 			case 's':cursor_locate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
-			case 'w':printf("%d %d ",win.ws_row,win.ws_col);
+			case 'w':printf("%d %d ",cur_state.win_height,cur_state.win_width);fflush(stdout);break;
+			case 't':printf("%d ",cur_state.total_line);fflush(stdout);break;
             default:break;
 		}
 	}

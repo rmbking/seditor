@@ -2,6 +2,7 @@
 #include "main.h"
 #include "kbhit.h"
 #include "cursor.h"
+#include "control.h"
 
 FILE *FP;
 struct state cur_state;
@@ -23,14 +24,6 @@ void mouse_show()
 	printf("\033[?25h");
 #endif
 }
-void curse_still()
-{
-
-}
-int edit()
-{}
-int control()
-{}
 void check(int *mode,char * path)
 {
 	struct stat file_info;

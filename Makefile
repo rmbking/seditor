@@ -1,6 +1,6 @@
 CC=gcc
-OBJ = main.o kbhit.o view.o
-HEAD = kbhit.h main.h cursor.h
+OBJ = main.o kbhit.o view.o	edit.o control.o
+HEAD = kbhit.h main.h cursor.h	edit.h control.h
 all: $(OBJ)
 	$(CC) -o seditor -g $(OBJ)
 	cp seditor ~/bin/

@@ -24,6 +24,8 @@
 #define SUCCESS 0
 #define FAILURE -1
 
+#define TABLEN 4
+
 #define Ctl(x) (x - 'a' + 1)
 struct state{
 	int total_line;
