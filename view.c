@@ -21,8 +21,8 @@ void update_pos(char tmp,int *row,int *col)
 }
 void next(char c,int *row,int *col)
 {
-	if(c == 't') 
-		*col += (TABLEN - *col % TABLEN + 1) % (TABLEN + 1);
+	if(c == '\t') 
+		*col = (*col + 3) / TABLEN * TABLEN  + 1;
 	else if(c == '\n') {
 		*col = 1;
 		(*row) ++;
@@ -79,16 +79,20 @@ static void display(int start_line)
 			cur_col = 1;
 			start = 1;
 		}
-		if(((word = fgetc(FP)) != EOF) && start)
+		if((word = fgetc(FP)) != EOF) 
 		{
-			putchar(word);
+			next(word,&cur_row,&cur_col);
+			if(start)
+				if(word != '\t')
+					putchar(word);
+				else
+					CURSOR_MOVE(cur_row,cur_col);
 		}
 		else if(cur_row < cur_state.win_height && start)
 		{
 			printf("~\n");
 			cur_row++;
 		}
-		update_pos(word,&cur_row,&cur_col);
 		if(cur_col > cur_state.win_width )
 		{
 			cur_col = 1;
