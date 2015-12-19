@@ -4,6 +4,15 @@
 #include "main.h"
 #include "cursor.h"
 #include "view.h"
+void CheckCursor()
+{
+
+	if(cur_state.line_endpos[cur_state.cur_row] < cur_state.cur_col)	//not move the cursor to the position where no character exits.
+	{
+		CURSOR_MOVE(cur_state.cur_row,cur_state.line_endpos[cur_state.cur_row]);
+		cur_state.cur_col = cur_state.line_endpos[cur_state.cur_row];
+	}
+}
 void CursorUp(int line)
 {
 	while(line--)
@@ -19,10 +28,13 @@ void CursorUp(int line)
 			{
 				cur_state.start_line--;
 				display(cur_state.start_line);
-				CURSOR_MOVE(1,1);
+				CURSOR_MOVE(1,cur_state.cur_col);
+				CheckCursor();
 			}
 		}
 	}
+
+	CheckCursor();
 }
 void CursorDown(int line)
 {
@@ -39,10 +51,13 @@ void CursorDown(int line)
 			{
 				cur_state.start_line++;
 				display(cur_state.start_line);
-				CURSOR_MOVE(cur_state.win_height-1,1);
+				CURSOR_MOVE(cur_state.win_height-1,cur_state.cur_col);
+				CheckCursor();
 			}
 		}
 	}
+
+	CheckCursor();
 }
 void CursorLeft(int character)
 {
@@ -55,7 +70,7 @@ void CursorLeft(int character)
 }
 void CursorRight(int character)
 {
-	while(cur_state.cur_col <= cur_state.win_width && character >= 0)
+	while(cur_state.cur_col < cur_state.line_endpos[cur_state.cur_row] && character >= 0)
 	{
 		cur_state.cur_col++;
 		CURSOR_RIGHT();

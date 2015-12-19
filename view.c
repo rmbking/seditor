@@ -21,6 +21,7 @@ void next(char c,int *row,int *col)
 	if(c == '\t') 
 		*col = (*col + 3) / TABLEN * TABLEN  + 1;
 	else if(c == '\n') {
+		cur_state.line_endpos[*row] = *col;
 		*col = 1;
 		(*row) ++;
 	}
@@ -28,6 +29,7 @@ void next(char c,int *row,int *col)
 		(*col)++;
 	if(*col > cur_state.win_width)
 	{
+		cur_state.line_endpos[*row] = *col - 1;
 		*col -= cur_state.win_width;
 		(*row) ++;
 	}
@@ -50,6 +52,7 @@ void state_init()
 
 	cur_state.total_line =cur_row-1;
 }
+/*not change about the cur_state content but line_endpos*/
 void display(int start_line)
 {
 	char word;
@@ -58,9 +61,11 @@ void display(int start_line)
 	int cur_row,cur_col;
 	clear_screen();
 	fseek(FP,0,SEEK_SET);
+	/*
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
 	cur_state.win_height = win.ws_row;
 	cur_state.win_width = win.ws_col;
+	*/
 	cur_row = 1;
 	cur_col = 1;
 	start = 0;
@@ -88,11 +93,7 @@ void display(int start_line)
 		else if(cur_row < cur_state.win_height && start)
 		{
 			printf("~\n");
-			cur_row++;
-		}
-		if(cur_col > cur_state.win_width )
-		{
-			cur_col = 1;
+			cur_state.line_endpos[cur_row] = cur_col;
 			cur_row++;
 		}
 		if(cur_row == cur_state.win_height && !start_line)		//add the latter condition to fix the bug as above
