@@ -6,6 +6,23 @@
 
 FILE *FP;
 struct state cur_state;
+struct buffer inbuffer;
+void addinbuffer(char c)
+{
+	int k;
+	if(inbuffer.size < BUFLEN)
+		inbuffer.buf[inbuffer.size++] = c;
+	else
+	{
+		for(k = 0; k < BUFLEN - 1; k++)
+			inbuffer.buf[k] = inbuffer.buf[k+1];
+		inbuffer.buf[BUFLEN-1] = c;
+	}
+}
+void clearinbuffer()
+{
+	inbuffer.size = 0;
+}
 void clear_screen()
 {
 #ifdef LINUX

@@ -25,6 +25,7 @@
 #define FAILURE -1
 
 #define TABLEN 4
+#define BUFLEN 10
 
 #define Ctl(x) (x - 'a' + 1)
 struct state{
@@ -36,6 +37,14 @@ struct state{
 	int cur_col;
 	int line_endpos[100];	
 };
+struct buffer{
+	char buf[10];
+	int size;
+};
 extern FILE *FP;
 extern struct state cur_state;
+extern struct buffer inbuffer;
+
+extern void addinbuffer(char c);
+extern void clearinbuffer();
 #endif

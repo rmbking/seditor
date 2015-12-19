@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <termios.h>
+#include <string.h>
 #include "kbhit.h"
 #include "view.h"
 #include "main.h"
@@ -51,6 +52,8 @@ void state_init()
 		next(word,&cur_row,&cur_col);
 
 	cur_state.total_line =cur_row-1;
+
+	memset(&inbuffer,0,sizeof(inbuffer));
 }
 /*not change about the cur_state content but line_endpos*/
 void display(int start_line)
@@ -142,6 +145,26 @@ int view()
 			case 'l':
 					 CursorRight(1);
 					 break;
+			case 'g':
+					if(inbuffer.buf[inbuffer.size-1] == 'g')
+					{
+						display(1);
+						cur_state.start_line = 1;
+						cur_state.cur_row = 1;
+						cur_state.cur_col = 1;
+						CURSOR_MOVE(1,1);
+						clearinbuffer();
+						break;
+					}
+					addinbuffer('g');
+					break;
+			case 'G':
+					display(cur_state.total_line - cur_state.win_height + 2);
+					cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
+					cur_state.cur_row = cur_state.win_height - 1;
+					cur_state.cur_col = 1;
+					CURSOR_MOVE(cur_state.win_height-1,1);
+					break;
 			case Ctl('f'):
 					 
 						cur_state.start_line += cur_state.win_height - 2; 
@@ -202,7 +225,9 @@ int view()
 			case 's':CursorLocate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
 			case 'w':printf("%d %d ",cur_state.win_height,cur_state.win_width);fflush(stdout);break;
 			case 't':printf("%d ",cur_state.total_line);fflush(stdout);break;
-            default:break;
+            default:
+					 addinbuffer(cmd);
+					 break;
 		}
 	}
 }
