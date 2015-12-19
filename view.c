@@ -4,9 +4,6 @@
 #include "view.h"
 #include "main.h"
 #include "cursor.h"
-int  cur_line;
-int  cur_pos; 
-int  total_line;
 struct winsize win;
 void update_pos(char tmp,int *row,int *col)
 {
@@ -53,7 +50,7 @@ void state_init()
 
 	cur_state.total_line =cur_row-1;
 }
-static void display(int start_line)
+void display(int start_line)
 {
 	char word;
 	int start;
@@ -114,8 +111,8 @@ int view()
 	*/
 	display(1);
 	CURSOR_MOVE(1,1);
-	cur_line = 1;
-	cur_pos = 1;
+	cur_state.cur_row = 1;
+	cur_state.cur_col = 1;
 	cur_state.start_line = 1;
     while(cmd = kb_input())
     {
@@ -133,50 +130,33 @@ int view()
 					 return CONTROL_MODE;
 
 			case 'h':
-					 CURSOR_LEFT();
-					 if(cur_pos >1)
-						 cur_pos--;
+					 CursorLeft(1);
 					 break;
 			case 'j':
-					 if(cur_line < cur_state.win_height - 1)
-					 {
-						 cur_line ++;
-				   	 	CURSOR_DOWN();
-					 }
-					 else
-					 {
-						 if(cur_state.start_line + cur_state.win_height - 2 < cur_state.total_line )
-						 {
-							cur_state.start_line++; 
-							display(cur_state.start_line);
-							CURSOR_MOVE(cur_state.win_height-1,1);
-						 }
-					 }
+					 CursorDown(1);
 					 break;
 			case 'k':
-					 if(cur_line > 1)
-					 {
-						 cur_line --;
-					 	CURSOR_UP();
-					 }
-					 else
-					 {
-						 if(cur_state.start_line > 1)
-						 {
-						 	cur_state.start_line--;
-						 	display(cur_state.start_line);
-							CURSOR_MOVE(1,1);
-						 }
-					 }
+					 CursorUp(1);
 					 break;
-			case 'l':CURSOR_RIGHT();break;
+			case 'l':
+					 CursorRight(1);
+					 break;
 			case Ctl('f'):
+					 
 						cur_state.start_line += cur_state.win_height - 2; 
 						if(cur_state.start_line > cur_state.total_line - cur_state.win_height + 2) 
 							 cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
 						display(cur_state.start_line);
 						CURSOR_MOVE(1,1);
-						cur_line = 1;
+						cur_state.cur_row = 1;
+					 	
+					 /*	//simple implement,but not effecient
+						CURSOR_MOVE(cur_state.win_height - 1,1);
+						cur_state.cur_row = cur_state.win_height - 1;
+						CursorDown(cur_state.win_height - 2);
+						CURSOR_MOVE(1,1);
+						cur_state.cur_row = 1;
+						*/
 						break;
 
 			case Ctl('b'):
@@ -185,7 +165,7 @@ int view()
 							cur_state.start_line = 1;
 						display(cur_state.start_line);
 						CURSOR_MOVE(cur_state.win_height-1,1);
-						cur_line = cur_state.win_height - 1;
+						cur_state.cur_row = cur_state.win_height - 1;
 						break;
 			
 			case Ctl('d'):
@@ -194,7 +174,7 @@ int view()
 							 cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
 						display(cur_state.start_line);
 						CURSOR_MOVE(1,1);
-						cur_line = 1;
+						cur_state.cur_row = 1;
 						break;
 
 			case Ctl('u'):
@@ -203,22 +183,22 @@ int view()
 							cur_state.start_line = 1;
 						display(cur_state.start_line);
 						CURSOR_MOVE(cur_state.win_height-1,1);
-						cur_line = cur_state.win_height - 1;
+						cur_state.cur_row = cur_state.win_height - 1;
 						break;
 			case 'H':
 						CURSOR_MOVE(1,1);
-						cur_line = 1;
+						cur_state.cur_row = 1;
 						break;
 			case 'M':
 						CURSOR_MOVE(cur_state.win_height/2,1);
-						cur_line = cur_state.win_height/2;
+						cur_state.cur_row = cur_state.win_height/2;
 						break;
 			case 'L':
 						CURSOR_MOVE(cur_state.win_height - 1,1);
-						cur_line = cur_state.win_height - 1;
+						cur_state.cur_row = cur_state.win_height - 1;
 						break;
 
-			case 's':cursor_locate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
+			case 's':CursorLocate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
 			case 'w':printf("%d %d ",cur_state.win_height,cur_state.win_width);fflush(stdout);break;
 			case 't':printf("%d ",cur_state.total_line);fflush(stdout);break;
             default:break;

@@ -3,7 +3,15 @@
 int control()
 {
 	char cmd[100];
+	int row,col;
 	scanf("%s",cmd);
-	if(strcmp(cmd,"q"))
-		return EXIT;
+	switch(cmd[0])
+	{
+		/*
+		case 'w':
+			printf("%d %d ",cur_state.win_height,cur_state.win_width);
+			break;
+			*/
+		case 'q':return EXIT;
+	}
 }

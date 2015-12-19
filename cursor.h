@@ -18,4 +18,12 @@
 #define CURSOR_RIGHT() printf("\033[1C");fflush(stdout);
 
 #define CURSOR_MOVE(X,Y) printf("\033[%d;%dH",X,Y);fflush(stdout);
+
+extern void CursorUp(int line);
+extern void cursorDown(int line);
+extern void CursorLeft(int character);
+extern void CursorRight(int character);
+
+extern void CursorMove(int row,int col);
+extern void CursorLocate(int *row,int *col);
 #endif
