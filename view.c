@@ -118,6 +118,7 @@ int view()
 	cur_state.cur_row = 1;
 	cur_state.cur_col = 1;
 	cur_state.start_line = 1;
+	cur_state.cur_pos = 1;
     while(cmd = kb_input())
     {
     	if(cmd == FAILURE)
@@ -131,19 +132,24 @@ int view()
 			case ':':
 					 CURSOR_MOVE(cur_state.win_height,1);
 					 putchar(':');
+			 		 clearinbuffer();
 					 return CONTROL_MODE;
 
 			case 'h':
 					 CursorLeft(1);
+			 		 clearinbuffer();
 					 break;
 			case 'j':
 					 CursorDown(1);
+			 		 clearinbuffer();
 					 break;
 			case 'k':
 					 CursorUp(1);
+			 		 clearinbuffer();
 					 break;
 			case 'l':
 					 CursorRight(1);
+			 		 clearinbuffer();
 					 break;
 			case 'g':
 					if(inbuffer.buf[inbuffer.size-1] == 'g')
@@ -164,6 +170,7 @@ int view()
 					cur_state.cur_row = cur_state.win_height - 1;
 					cur_state.cur_col = 1;
 					CURSOR_MOVE(cur_state.win_height-1,1);
+			 		 clearinbuffer();
 					break;
 			case Ctl('f'):
 					 
@@ -171,8 +178,10 @@ int view()
 						if(cur_state.start_line > cur_state.total_line - cur_state.win_height + 2) 
 							 cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
 						display(cur_state.start_line);
-						CURSOR_MOVE(1,1);
+						CURSOR_MOVE(1,cur_state.cur_pos);
 						cur_state.cur_row = 1;
+						cur_state.cur_col = cur_state.cur_pos;
+						CheckCursor();
 					 	
 					 /*	//simple implement,but not effecient
 						CURSOR_MOVE(cur_state.win_height - 1,1);
@@ -181,6 +190,7 @@ int view()
 						CURSOR_MOVE(1,1);
 						cur_state.cur_row = 1;
 						*/
+			 		 clearinbuffer();
 						break;
 
 			case Ctl('b'):
@@ -188,8 +198,11 @@ int view()
 						if(cur_state.start_line <= 0)
 							cur_state.start_line = 1;
 						display(cur_state.start_line);
-						CURSOR_MOVE(cur_state.win_height-1,1);
+						CURSOR_MOVE(cur_state.win_height-1,cur_state.cur_pos);
 						cur_state.cur_row = cur_state.win_height - 1;
+						cur_state.cur_col = cur_state.cur_pos;
+						CheckCursor();
+			 		 clearinbuffer();
 						break;
 			
 			case Ctl('d'):
@@ -197,8 +210,11 @@ int view()
 						if(cur_state.start_line > cur_state.total_line - cur_state.win_height + 2) 
 							 cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
 						display(cur_state.start_line);
-						CURSOR_MOVE(1,1);
+						CURSOR_MOVE(1,cur_state.cur_pos);
 						cur_state.cur_row = 1;
+						cur_state.cur_col = cur_state.cur_pos;
+						CheckCursor();
+			 		 clearinbuffer();
 						break;
 
 			case Ctl('u'):
@@ -206,20 +222,26 @@ int view()
 						if(cur_state.start_line <= 0)
 							cur_state.start_line = 1;
 						display(cur_state.start_line);
-						CURSOR_MOVE(cur_state.win_height-1,1);
+						CURSOR_MOVE(cur_state.win_height-1,cur_state.cur_pos);
 						cur_state.cur_row = cur_state.win_height - 1;
+						cur_state.cur_col = cur_state.cur_pos;
+						CheckCursor();
+			 		 clearinbuffer();
 						break;
 			case 'H':
 						CURSOR_MOVE(1,1);
 						cur_state.cur_row = 1;
+			 		 clearinbuffer();
 						break;
 			case 'M':
 						CURSOR_MOVE(cur_state.win_height/2,1);
 						cur_state.cur_row = cur_state.win_height/2;
+			 		 clearinbuffer();
 						break;
 			case 'L':
 						CURSOR_MOVE(cur_state.win_height - 1,1);
 						cur_state.cur_row = cur_state.win_height - 1;
+			 		 clearinbuffer();
 						break;
 
 			case 's':CursorLocate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;

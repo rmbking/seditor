@@ -33,6 +33,7 @@ struct state{
 	int start_line;
 	int win_height;
 	int win_width;
+	int cur_pos;	//the cursor's position when it moves up and down
 	int cur_row;
 	int cur_col;
 	int line_endpos[100];	
