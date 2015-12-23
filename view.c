@@ -55,6 +55,22 @@ void state_init()
 
 	memset(&inbuffer,0,sizeof(inbuffer));
 }
+int digit_len(int number)
+{
+	char line_str[10];
+	sprintf(line_str,"%d",cur_state.total_line);
+	return strlen(line_str);
+}
+void prepro()
+{
+	if(cur_state.view_mode & LINESHOW)
+	{
+		cur_state.start_pos = digit_len(cur_state.total_line) + 1;
+	}
+	else
+		cur_state.start_pos = 0;
+
+}
 /*not change about the cur_state content but line_endpos*/
 void display(int start_line)
 {
@@ -62,6 +78,8 @@ void display(int start_line)
 	int start;
 	int row,col;
 	int cur_row,cur_col;
+	int tmp;
+
 	clear_screen();
 	fseek(FP,0,SEEK_SET);
 	/*
@@ -72,6 +90,7 @@ void display(int start_line)
 	cur_row = 1;
 	cur_col = 1;
 	start = 0;
+
 	CURSOR_MOVE(1,1);
 	while(1)
 	{
@@ -88,10 +107,23 @@ void display(int start_line)
 		{
 			next(word,&cur_row,&cur_col);
 			if(start)
-				if(word != '\t')
+			{
+				if(word == '\n')
+					putchar(word);
+				/*
+				if(cur_state.cur_col == 1)
+				{
+					tmp = digit_len(cur_row);
+					tmp = cur_state.start_pos - tmp;
+					CURSOR_MOVE(cur_row,tmp);
+					printf("%d ",cur_row);
+				}
+				*/
+				if(word != '\t' && word != '\n')
 					putchar(word);
 				else
 					CURSOR_MOVE(cur_row,cur_col);
+			}
 		}
 		else if(cur_row < cur_state.win_height && start)
 		{
@@ -102,23 +134,29 @@ void display(int start_line)
 		if(cur_row == cur_state.win_height && !start_line)		//add the latter condition to fix the bug as above
 			break;
 	}
+	text_info();
 }
 int view()
 {
 
 	char cmd;
 	int row,col;
-	state_init();
+	if(cur_state.view_mode == 0)
+	{
 	/*just for debug
 	printf("%d\n",cur_state.total_line);
 	sleep(5);
 	*/
-	display(1);
-	CURSOR_MOVE(1,1);
-	cur_state.cur_row = 1;
-	cur_state.cur_col = 1;
-	cur_state.start_line = 1;
-	cur_state.cur_pos = 1;
+		state_init();
+		display(1);
+		CURSOR_MOVE(1,1);
+		cur_state.cur_row = 1;
+		cur_state.cur_col = 1;
+		cur_state.start_line = 1;
+		cur_state.cur_pos = 1;
+	}
+	else
+		prepro();
     while(cmd = kb_input())
     {
     	if(cmd == FAILURE)
@@ -247,9 +285,11 @@ int view()
 			case 's':CursorLocate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
 			case 'w':printf("%d %d ",cur_state.win_height,cur_state.win_width);fflush(stdout);break;
 			case 't':printf("%d ",cur_state.total_line);fflush(stdout);break;
+			case 'd':printf("%d",cur_state.start_pos);break;
             default:
 					 addinbuffer(cmd);
 					 break;
 		}
+		text_info();
 	}
 }

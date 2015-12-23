@@ -27,13 +27,18 @@
 #define TABLEN 4
 #define BUFLEN 10
 
+#define LINESHOW  01
+#define MODIFIED  02
+
 #define Ctl(x) (x - 'a' + 1)
 struct state{
 	int total_line;
 	int start_line;
 	int win_height;
+	int view_mode;
 	int win_width;
 	int cur_pos;	//the cursor's position when it moves up and down
+	int start_pos;
 	int cur_row;
 	int cur_col;
 	int line_endpos[100];	
@@ -48,4 +53,6 @@ extern struct buffer inbuffer;
 
 extern void addinbuffer(char c);
 extern void clearinbuffer();
+
+extern void text_info();
 #endif

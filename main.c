@@ -41,6 +41,19 @@ void mouse_show()
 	printf("\033[?25h");
 #endif
 }
+void text_info()
+{
+	int cur_line;
+	cur_line = cur_state.start_line + cur_state.cur_row - 1;
+	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-20);
+	printf("                    ");
+	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-20);
+	printf("line:%d",cur_line);
+	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-5);
+	printf("%d%%",cur_line * 100 / cur_state.total_line);
+
+	CURSOR_MOVE(cur_state.cur_row,cur_state.cur_col);
+}
 void check(int *mode,char * path)
 {
 	struct stat file_info;

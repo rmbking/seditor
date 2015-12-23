@@ -13,5 +13,8 @@ int control()
 			break;
 			*/
 		case 'q':return EXIT;
+		case 'n':
+			cur_state.view_mode |= LINESHOW;
+			return VIEW_MODE;
 	}
 }
