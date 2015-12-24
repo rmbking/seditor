@@ -1,3 +1,4 @@
+#include "view.h"
 #include "main.h"
 #include "control.h"
 int control()

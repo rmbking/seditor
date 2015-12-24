@@ -68,17 +68,17 @@ void prepro()
 		cur_state.start_pos = digit_len(cur_state.total_line) + 1;
 	}
 	else
-		cur_state.start_pos = 0;
+		cur_state.start_pos = 1;
 
 }
 /*not change about the cur_state content but line_endpos*/
 void display(int start_line)
 {
 	char word;
-	int start;
-	int row,col;
+	int start;	//start to print
+	int end;	//end print
 	int cur_row,cur_col;
-	int tmp;
+	char tmp_str[100];
 
 	clear_screen();
 	fseek(FP,0,SEEK_SET);
@@ -90,6 +90,7 @@ void display(int start_line)
 	cur_row = 1;
 	cur_col = 1;
 	start = 0;
+	end = 0;
 
 	CURSOR_MOVE(1,1);
 	while(1)
@@ -98,27 +99,25 @@ void display(int start_line)
 		/*locate the first output line and set out flag*/
 		if(cur_row == start_line && start  == 0)
 		{
-			start_line = 0;		//fix the bug when the start_line reaches the same line as screen rows.
+			start = 1;
+			end = 1;		//fix the bug when the start_line reaches the same line as screen rows.
 			cur_row = 1;
 			cur_col = 1;
-			start = 1;
 		}
 		if((word = fgetc(FP)) != EOF) 
 		{
+			if(start)
+				if(cur_state.view_mode & LINESHOW && cur_col == 1)	//if the number of line needs to be shown
+				{
+					sprintf(tmp_str,"%%%dd ",cur_state.start_pos-2);	//a blank space follows the number
+					printf(tmp_str,cur_row + start_line - 1);
+					cur_col = cur_state.start_pos;
+				}
 			next(word,&cur_row,&cur_col);
 			if(start)
 			{
 				if(word == '\n')
 					putchar(word);
-				/*
-				if(cur_state.cur_col == 1)
-				{
-					tmp = digit_len(cur_row);
-					tmp = cur_state.start_pos - tmp;
-					CURSOR_MOVE(cur_row,tmp);
-					printf("%d ",cur_row);
-				}
-				*/
 				if(word != '\t' && word != '\n')
 					putchar(word);
 				else
@@ -131,7 +130,7 @@ void display(int start_line)
 			cur_state.line_endpos[cur_row] = cur_col;
 			cur_row++;
 		}
-		if(cur_row == cur_state.win_height && !start_line)		//add the latter condition to fix the bug as above
+		if(cur_row == cur_state.win_height && end)		//add the latter condition to fix the bug as above
 			break;
 	}
 	text_info();
@@ -156,7 +155,10 @@ int view()
 		cur_state.cur_pos = 1;
 	}
 	else
+	{
 		prepro();
+		display(cur_state.start_line);
+	}
     while(cmd = kb_input())
     {
     	if(cmd == FAILURE)
