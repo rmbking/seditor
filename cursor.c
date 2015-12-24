@@ -64,7 +64,7 @@ void CursorDown(int line)
 }
 void CursorLeft(int character)
 {
-	while(cur_state.cur_col > 1 && character >= 0)
+	while(cur_state.cur_col > 1 && character > 0)
 	{
 		cur_state.cur_col--;
 		CURSOR_LEFT();
@@ -74,7 +74,7 @@ void CursorLeft(int character)
 }
 void CursorRight(int character)
 {
-	while(cur_state.cur_col < cur_state.line_endpos[cur_state.cur_row] && character >= 0)
+	while(cur_state.cur_col < cur_state.line_endpos[cur_state.cur_row] && character > 0)
 	{
 		cur_state.cur_col++;
 		CURSOR_RIGHT();
