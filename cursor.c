@@ -12,6 +12,12 @@ void CheckCursor()
 		CURSOR_MOVE(cur_state.cur_row,cur_state.line_endpos[cur_state.cur_row]);
 		cur_state.cur_col = cur_state.line_endpos[cur_state.cur_row];
 	}
+	if(cur_state.view_mode & LINESHOW && cur_state.cur_col < cur_state.start_pos)
+	{
+		CURSOR_MOVE(cur_state.cur_row,cur_state.start_pos);
+		cur_state.cur_col = cur_state.start_pos;
+	}
+
 }
 void CursorUp(int line)
 {
@@ -64,7 +70,7 @@ void CursorDown(int line)
 }
 void CursorLeft(int character)
 {
-	while(cur_state.cur_col > 1 && character > 0)
+	while(cur_state.cur_col > cur_state.start_pos && character > 0)
 	{
 		cur_state.cur_col--;
 		CURSOR_LEFT();

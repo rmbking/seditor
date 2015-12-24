@@ -158,6 +158,7 @@ int view()
 	{
 		prepro();
 		display(cur_state.start_line);
+		CheckCursor();
 	}
     while(cmd = kb_input())
     {
@@ -197,8 +198,8 @@ int view()
 						display(1);
 						cur_state.start_line = 1;
 						cur_state.cur_row = 1;
-						cur_state.cur_col = 1;
-						CURSOR_MOVE(1,1);
+						cur_state.cur_col = cur_state.start_pos;
+						CURSOR_MOVE(1,cur_state.start_pos);
 						clearinbuffer();
 						break;
 					}
@@ -208,8 +209,8 @@ int view()
 					display(cur_state.total_line - cur_state.win_height + 2);
 					cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
 					cur_state.cur_row = cur_state.win_height - 1;
-					cur_state.cur_col = 1;
-					CURSOR_MOVE(cur_state.win_height-1,1);
+					cur_state.cur_col = cur_state.start_pos;
+					CURSOR_MOVE(cur_state.win_height-1,cur_state.start_pos);
 			 		 clearinbuffer();
 					break;
 			case Ctl('f'):
@@ -269,18 +270,21 @@ int view()
 			 		 clearinbuffer();
 						break;
 			case 'H':
-						CURSOR_MOVE(1,1);
+						CURSOR_MOVE(1,cur_state.start_pos);
 						cur_state.cur_row = 1;
+						cur_state.cur_col = cur_state.start_pos;
 			 		 clearinbuffer();
 						break;
 			case 'M':
-						CURSOR_MOVE(cur_state.win_height/2,1);
+						CURSOR_MOVE(cur_state.win_height/2,cur_state.start_pos);
 						cur_state.cur_row = cur_state.win_height/2;
+						cur_state.cur_col = cur_state.start_pos;
 			 		 clearinbuffer();
 						break;
 			case 'L':
-						CURSOR_MOVE(cur_state.win_height - 1,1);
+						CURSOR_MOVE(cur_state.win_height - 1,cur_state.start_pos);
 						cur_state.cur_row = cur_state.win_height - 1;
+						cur_state.cur_col = cur_state.start_pos;
 			 		 clearinbuffer();
 						break;
 
