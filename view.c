@@ -129,12 +129,17 @@ int view()
 
 	char cmd;
 	int row,col;
-	if(cur_state.view_mode == 0)
+	static int flag = 0;
+	static int save_mode = 0;
+	int modified_mode = save_mode ^ cur_state.view_mode;
+	save_mode = cur_state.view_mode;
+	if(flag == 0)
 	{
 	/*just for debug
 	printf("%d\n",cur_state.total_line);
 	sleep(5);
 	*/
+		flag = 1;
 		cur_state.cur_row = 1;
 		cur_state.cur_col = 1;
 		cur_state.start_line = 1;
@@ -143,12 +148,13 @@ int view()
 		display(1);
 		CURSOR_MOVE(1,1);
 	}
-	else
+	else if (modified_mode & LINESHOW)
 	{
 		prepro();
 		display(cur_state.start_line);
 		CheckCursor();
 	}
+	
     while(cmd = kb_input())
     {
     	if(cmd == FAILURE)
@@ -160,8 +166,6 @@ int view()
         {
         	case 'i':return EDIT_MODE;
 			case ':':
-					 CURSOR_MOVE(cur_state.win_height,1);
-					 putchar(':');
 			 		 clearinbuffer();
 					 return CONTROL_MODE;
 
