@@ -30,6 +30,7 @@
 #define LINESHOW  01
 #define MODIFIED  02
 
+#define MAX_SCREEN_HEIGHT 100
 #define Ctl(x) (x - 'a' + 1)
 struct state{
 	int total_line;
@@ -40,8 +41,9 @@ struct state{
 	int cur_pos;	//the cursor's position when it moves up and down
 	int start_pos;
 	int cur_row;
+	int last_row;
 	int cur_col;
-	int line_endpos[100];	
+	int line_endpos[MAX_SCREEN_HEIGHT];	
 };
 struct buffer{
 	char buf[10];

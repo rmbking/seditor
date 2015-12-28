@@ -5,24 +5,14 @@
 #include "view.h"
 #include "main.h"
 #include "cursor.h"
-struct winsize win;
-void update_pos(char tmp,int *row,int *col)
-{
-	switch(tmp){
-		case '\n':
-			(*row) ++;
-			*col = 1;
-			break;
-		default:
-			(*col)++;
-	}
-}
+
 void next(char c,int *row,int *col)
 {
 	if(c == '\t') 
-		*col = (*col + 3) / TABLEN * TABLEN  + 1;
+		*col = (*col + TABLEN - 1) / TABLEN * TABLEN  + 1;
 	else if(c == '\n') {
-		cur_state.line_endpos[*row] = *col;
+		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
+			cur_state.line_endpos[*row] = *col;
 		*col = 1;
 		(*row) ++;
 	}
@@ -30,7 +20,8 @@ void next(char c,int *row,int *col)
 		(*col)++;
 	if(*col > cur_state.win_width)
 	{
-		cur_state.line_endpos[*row] = *col - 1;
+		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
+			cur_state.line_endpos[*row] = *col - 1;
 		*col -= cur_state.win_width;
 		(*row) ++;
 	}
@@ -39,6 +30,8 @@ void state_init()
 {
 	char word;
 	int cur_row,cur_col;
+	int tmp;
+	struct winsize win;
 
 	cur_row = 1;
 	cur_col = 1;
@@ -48,9 +41,8 @@ void state_init()
 	cur_state.win_height = win.ws_row;
 	cur_state.win_width = win.ws_col;
 
-	while((word = fgetc(FP)) != EOF)
+	while((word = fgetc(FP)) != EOF) 
 		next(word,&cur_row,&cur_col);
-
 	cur_state.total_line =cur_row-1;
 
 	memset(&inbuffer,0,sizeof(inbuffer));
@@ -65,32 +57,29 @@ void prepro()
 {
 	if(cur_state.view_mode & LINESHOW)
 	{
-		cur_state.start_pos = digit_len(cur_state.total_line) + 1;
+		cur_state.start_pos = digit_len(cur_state.total_line) + 2;
 	}
 	else
 		cur_state.start_pos = 1;
 
 }
-/*not change about the cur_state content but line_endpos*/
+/*not change about the cur_state content but line_endpos and last_row*/
 void display(int start_line)
 {
 	char word;
-	int start;	//start to print
-	int end;	//end print
+	int start;	//start flag to print
+	int end;	//end flag to print
 	int cur_row,cur_col;
 	char tmp_str[100];
 
 	clear_screen();
 	fseek(FP,0,SEEK_SET);
-	/*
-	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
-	cur_state.win_height = win.ws_row;
-	cur_state.win_width = win.ws_col;
-	*/
+
 	cur_row = 1;
 	cur_col = 1;
 	start = 0;
 	end = 0;
+	cur_state.last_row = cur_state.win_height - 1;
 
 	CURSOR_MOVE(1,1);
 	while(1)
@@ -116,9 +105,7 @@ void display(int start_line)
 			next(word,&cur_row,&cur_col);
 			if(start)
 			{
-				if(word == '\n')
-					putchar(word);
-				if(word != '\t' && word != '\n')
+				if(word != '\t')
 					putchar(word);
 				else
 					CURSOR_MOVE(cur_row,cur_col);
@@ -126,6 +113,8 @@ void display(int start_line)
 		}
 		else if(cur_row < cur_state.win_height && start)
 		{
+			if(cur_state.last_row > cur_row - 1)
+				cur_state.last_row = cur_row - 1;	//record the previous line of the first ~line
 			printf("~\n");
 			cur_state.line_endpos[cur_row] = cur_col;
 			cur_row++;
@@ -146,13 +135,13 @@ int view()
 	printf("%d\n",cur_state.total_line);
 	sleep(5);
 	*/
-		state_init();
-		display(1);
-		CURSOR_MOVE(1,1);
 		cur_state.cur_row = 1;
 		cur_state.cur_col = 1;
 		cur_state.start_line = 1;
 		cur_state.cur_pos = 1;
+		state_init();
+		display(1);
+		CURSOR_MOVE(1,1);
 	}
 	else
 	{
@@ -206,12 +195,20 @@ int view()
 					addinbuffer('g');
 					break;
 			case 'G':
-					display(cur_state.total_line - cur_state.win_height + 2);
-					cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
-					cur_state.cur_row = cur_state.win_height - 1;
+					if(cur_state.total_line > cur_state.win_height - 2)
+					{
+						display(cur_state.total_line - cur_state.win_height + 2);
+						cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
+					}
+					else
+					{
+						display(1);
+						cur_state.start_line = 1;
+					}
+					cur_state.cur_row = cur_state.last_row;
 					cur_state.cur_col = cur_state.start_pos;
-					CURSOR_MOVE(cur_state.win_height-1,cur_state.start_pos);
-			 		 clearinbuffer();
+					CURSOR_MOVE(cur_state.last_row,cur_state.start_pos);
+			 		clearinbuffer();
 					break;
 			case Ctl('f'):
 					 
@@ -279,19 +276,24 @@ int view()
 						CURSOR_MOVE(cur_state.win_height/2,cur_state.start_pos);
 						cur_state.cur_row = cur_state.win_height/2;
 						cur_state.cur_col = cur_state.start_pos;
+						CheckCursor();
 			 		 clearinbuffer();
 						break;
 			case 'L':
 						CURSOR_MOVE(cur_state.win_height - 1,cur_state.start_pos);
 						cur_state.cur_row = cur_state.win_height - 1;
 						cur_state.cur_col = cur_state.start_pos;
+						CheckCursor();
 			 		 clearinbuffer();
 						break;
 
+			/*for debug*/
 			case 's':CursorLocate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
 			case 'w':printf("%d %d ",cur_state.win_height,cur_state.win_width);fflush(stdout);break;
 			case 't':printf("%d ",cur_state.total_line);fflush(stdout);break;
 			case 'd':printf("%d",cur_state.start_pos);break;
+			case 'e':printf("%d",cur_state.last_row);break;
+			/*for debug*/
             default:
 					 addinbuffer(cmd);
 					 break;

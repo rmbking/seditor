@@ -7,11 +7,18 @@
 void CheckCursor()
 {
 
+	if(cur_state.cur_row > cur_state.last_row)
+	{
+		CURSOR_MOVE(cur_state.last_row,cur_state.start_pos);
+		cur_state.cur_row = cur_state.last_row;
+	}
+
 	if(cur_state.line_endpos[cur_state.cur_row] < cur_state.cur_col)	//not move the cursor to the position where no character exits.
 	{
 		CURSOR_MOVE(cur_state.cur_row,cur_state.line_endpos[cur_state.cur_row]);
 		cur_state.cur_col = cur_state.line_endpos[cur_state.cur_row];
 	}
+
 	if(cur_state.view_mode & LINESHOW && cur_state.cur_col < cur_state.start_pos)
 	{
 		CURSOR_MOVE(cur_state.cur_row,cur_state.start_pos);
