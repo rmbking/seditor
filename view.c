@@ -61,7 +61,7 @@ void prepro()
 	}
 	else
 		cur_state.start_pos = 1;
-
+	cur_state.cur_col =  cur_state.cur_col + cur_state.start_pos - 1;
 }
 /*not change about the cur_state content but line_endpos and last_row*/
 void display(int start_line)
@@ -150,11 +150,22 @@ int view()
 	}
 	else if (modified_mode & LINESHOW)
 	{
-		prepro();
-		display(cur_state.start_line);
-		CheckCursor();
+		if(cur_state.view_mode & LINESHOW)
+		{
+			prepro();
+			display(cur_state.start_line);
+			CheckCursor();
+		}
+		else
+		{
+			cur_state.cur_col = cur_state.cur_col - cur_state.start_pos + 1;
+			cur_state.start_pos = 1;
+			display(cur_state.start_line);
+			CheckCursor();
+		}
 	}
 	
+	text_info();	//for moving the cursor to its right position immeditely.
     while(cmd = kb_input())
     {
     	if(cmd == FAILURE)
