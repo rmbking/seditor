@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h>	
 #include <termios.h>
 #include <string.h>
 #include "kbhit.h"
@@ -8,16 +8,33 @@
 
 void next(char c,int *row,int *col)
 {
+	int i;
+	int tmp_row,tmp_col;
 	if(c == '\t') 
+	{
+		tmp_col = *col;	
 		*col = (*col + TABLEN - 1) / TABLEN * TABLEN  + 1;
+		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
+		{	
+			for(i = tmp_col; i < *col && i <= cur_state.win_width; i++)
+				cur_state.character[*row][i] = '\t';
+		}
+	}
 	else if(c == '\n') {
 		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
+		{
 			cur_state.line_endpos[*row] = *col;
+			cur_state.character[*row][*col] = '\n';
+		}
 		*col = 1;
 		(*row) ++;
 	}
 	else
+	{
+		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
+			cur_state.character[*row][*col] = c;
 		(*col)++;
+	}
 	if(*col > cur_state.win_width)
 	{
 		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
@@ -131,6 +148,7 @@ int view()
 	int row,col;
 	static int flag = 0;
 	static int save_mode = 0;
+	int i;
 	int modified_mode = save_mode ^ cur_state.view_mode;
 	save_mode = cur_state.view_mode;
 	if(flag == 0)
@@ -307,7 +325,17 @@ int view()
 			case 'w':printf("%d %d ",cur_state.win_height,cur_state.win_width);fflush(stdout);break;
 			case 't':printf("%d ",cur_state.total_line);fflush(stdout);break;
 			case 'd':printf("%d",cur_state.start_pos);break;
-			case 'e':printf("%d",cur_state.last_row);break;
+			case 'e':printf("%d",cur_state.line_endpos[cur_state.cur_row]);break;
+			case 'c':
+					 for(i = 1 ; i < cur_state.line_endpos[cur_state.cur_row - 1]; i++)
+						 if(cur_state.character[cur_state.cur_row-1][i] == '\t')
+							 putchar('t');
+						 else 
+						 if(cur_state.character[cur_state.cur_row-1][i] == '\n')
+							 putchar('n');
+						 else 
+						 putchar(cur_state.character[cur_state.cur_row-1][i]);
+					 break;
 			/*for debug*/
             default:
 					 addinbuffer(cmd);

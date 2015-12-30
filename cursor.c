@@ -24,6 +24,11 @@ void CheckCursor()
 		CURSOR_MOVE(cur_state.cur_row,cur_state.start_pos);
 		cur_state.cur_col = cur_state.start_pos;
 	}
+	if(cur_state.character[cur_state.cur_row][cur_state.cur_col] == '\t')
+	{
+		cur_state.cur_col = (cur_state.cur_col + TABLEN - 1) / TABLEN * TABLEN;	
+		CURSOR_MOVE(cur_state.cur_row,cur_state.cur_col);
+	}
 
 }
 void CursorUp(int line)
@@ -77,13 +82,26 @@ void CursorDown(int line)
 }
 void CursorLeft(int character)
 {
+	int k;
 	while(cur_state.cur_col > cur_state.start_pos && character > 0)
 	{
-		cur_state.cur_col--;
-		CURSOR_LEFT();
-		character--;
+		if(cur_state.character[cur_state.cur_row][cur_state.cur_col] != '\t')
+		{
+			cur_state.cur_col--;
+			CURSOR_LEFT();
+			character--;
+		}
+		else
+		{
+			cur_state.cur_col -= TABLEN;
+			k = TABLEN;
+			while(k--)
+				CURSOR_LEFT();
+			character--;
+		}
 	}
 	cur_state.cur_pos = cur_state.cur_col;	//used for cursor up-moving and down-moving
+	CheckCursor();
 }
 void CursorRight(int character)
 {
@@ -94,6 +112,7 @@ void CursorRight(int character)
 		character--;
 	}
 	cur_state.cur_pos = cur_state.cur_col;
+	CheckCursor();
 }
 void CursorMove(int row,int col)
 {
