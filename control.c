@@ -32,6 +32,15 @@ void input(char *cmd)
 	pos = cmd;
 	while(tmp != '\n' && (pos - cmd) < cur_state.win_width - 25 )
 	{
+		if(tmp == 127)	//backspace
+		{
+			*(--pos) = '\0';
+			CURSOR_LEFT();	
+			printf(" ");
+			CURSOR_LEFT();	
+			tmp = kb_input();
+			continue;
+		}
 		*pos++ = tmp;
 		printf("%c",tmp);
 		fflush(stdout);
