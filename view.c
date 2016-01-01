@@ -13,7 +13,7 @@ void next(char c,int *row,int *col)
 	if(c == '\t') 
 	{
 		tmp_col = *col;	
-		*col = (*col + TABLEN - 1) / TABLEN * TABLEN  + 1;
+		*col = (*col + TABLEN - cur_state.start_pos) / TABLEN * TABLEN  + cur_state.start_pos;
 		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
 		{	
 			for(i = tmp_col; i < *col && i <= cur_state.win_width; i++)
