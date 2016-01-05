@@ -10,6 +10,7 @@ void next(char c,int *row,int *col)
 {
 	int i;
 	int tmp_row,tmp_col;
+	static char change_line = 1;
 	if(c == '\t') 
 	{
 		tmp_col = *col;	
@@ -26,8 +27,11 @@ void next(char c,int *row,int *col)
 			cur_state.line_endpos[*row] = *col;
 			cur_state.character[*row][*col] = '\n';
 		}
-		*col = 1;
-		(*row) ++;
+		if(change_line == 1)	//avoid the cursor moving down twice when reading the '\n' at the end of screen row.
+		{
+			(*row) ++;
+			*col = cur_state.start_pos;
+		}
 	}
 	else
 	{
@@ -38,10 +42,28 @@ void next(char c,int *row,int *col)
 	if(*col > cur_state.win_width)
 	{
 		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
-			cur_state.line_endpos[*row] = *col - 1;
-		*col -= cur_state.win_width;
+			cur_state.line_endpos[*row] = cur_state.win_width;
+		*col = *col - cur_state.win_width + cur_state.start_pos - 1;
+		change_line = 0;
 		(*row) ++;
 	}
+	else 
+		change_line = 1;	
+}
+void line_number_list()
+{
+	char format[100];
+	int line_no = cur_state.start_line;
+	int cur_row = 1;
+	sprintf(format,"%%%dd ",cur_state.start_pos-2);	//a blank space follows the number
+	while(cur_row <= cur_state.win_height-1 && line_no <= cur_state.total_line)
+	{
+		CURSOR_MOVE(cur_row,1);
+		printf(format,line_no);
+		cur_row++;
+		line_no++;
+	}
+	
 }
 void state_init()
 {
@@ -51,7 +73,7 @@ void state_init()
 	struct winsize win;
 
 	cur_row = 1;
-	cur_col = 1;
+	cur_col = cur_state.start_pos;
 
 	fseek(FP,0,SEEK_SET);
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
@@ -81,6 +103,7 @@ void prepro()
 	cur_state.cur_col =  cur_state.cur_col + cur_state.start_pos - 1;
 }
 /*not change about the cur_state content but line_endpos and last_row*/
+
 void display(int start_line)
 {
 	char word;
@@ -98,7 +121,7 @@ void display(int start_line)
 	end = 0;
 	cur_state.last_row = cur_state.win_height - 1;
 
-	CURSOR_MOVE(1,1);
+	CURSOR_MOVE(1,cur_state.start_pos);
 	while(1)
 	{
 		word = EOF;
@@ -108,23 +131,16 @@ void display(int start_line)
 			start = 1;
 			end = 1;		//fix the bug when the start_line reaches the same line as screen rows.
 			cur_row = 1;
-			cur_col = 1;
+			cur_col = cur_state.start_pos;
 		}
 		if((word = fgetc(FP)) != EOF) 
 		{
-			if(start)
-				if(cur_state.view_mode & LINESHOW && cur_col == 1)	//if the number of line needs to be shown
-				{
-					sprintf(tmp_str,"%%%dd ",cur_state.start_pos-2);	//a blank space follows the number
-					printf(tmp_str,cur_row + start_line - 1);
-					cur_col = cur_state.start_pos;
-				}
 			next(word,&cur_row,&cur_col);
 			if(start)
 			{
-				if(word != '\t')
+				if(word != '\t' && word != '\n')
 					putchar(word);
-				else
+//				else	//to prove the long line jumps to the proper position of next line.
 					CURSOR_MOVE(cur_row,cur_col);
 			}
 		}
@@ -139,6 +155,8 @@ void display(int start_line)
 		if(cur_row == cur_state.win_height && end)		//add the latter condition to fix the bug as above
 			break;
 	}
+	if(cur_state.view_mode & LINESHOW )	//if the number of line needs to be shown
+		line_number_list();
 	text_info();
 }
 int view()
@@ -171,6 +189,7 @@ int view()
 		if(cur_state.view_mode & LINESHOW)
 		{
 			prepro();
+			state_init();
 			display(cur_state.start_line);
 			CheckCursor();
 		}
@@ -178,6 +197,7 @@ int view()
 		{
 			cur_state.cur_col = cur_state.cur_col - cur_state.start_pos + 1;
 			cur_state.start_pos = 1;
+			state_init();
 			display(cur_state.start_line);
 			CheckCursor();
 		}
@@ -217,8 +237,8 @@ int view()
 			case 'g':
 					if(inbuffer.buf[inbuffer.size-1] == 'g')
 					{
-						display(1);
 						cur_state.start_line = 1;
+						display(1);
 						cur_state.cur_row = 1;
 						cur_state.cur_col = cur_state.start_pos;
 						CURSOR_MOVE(1,cur_state.start_pos);
@@ -230,8 +250,8 @@ int view()
 			case 'G':
 					if(cur_state.total_line > cur_state.win_height - 2)
 					{
-						display(cur_state.total_line - cur_state.win_height + 2);
 						cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
+						display(cur_state.total_line - cur_state.win_height + 2);
 					}
 					else
 					{

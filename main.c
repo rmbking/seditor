@@ -4,7 +4,7 @@
 #include "cursor.h"
 #include "control.h"
 
-FILE *FP;
+FILE *FP,*OFP;
 struct state cur_state;
 struct buffer inbuffer;
 void addinbuffer(char c)
@@ -40,6 +40,13 @@ void mouse_show()
 #ifdef LINUX
 	printf("\033[?25h");
 #endif
+}
+void init()
+{
+	memset(&cur_state,0,sizeof(cur_state));	
+	cur_state.start_line = 1;
+	cur_state.cur_pos = 1;
+	cur_state.start_pos = 1;
 }
 void text_info()
 {
@@ -94,6 +101,7 @@ void check(int *mode,char * path)
 void process()
 {
 	int mode = VIEW_MODE;
+	init();
 	while(mode != EXIT)
 	{
 		switch(mode)
@@ -105,6 +113,18 @@ void process()
 			default: printf("[view.c][process]:error,invalid mode.");
 		}
 	}
+}
+void fcopy(FILE *tfp,FILE *sfp)
+{
+	char word;
+	while((word = fgetc(sfp)) != EOF)
+		fputc(word,tfp);
+}
+int frm(char *path)
+{
+	if(remove(path))
+		return	-1;
+   return 0;	
 }
 int main(int argc,char *argv[])
 {
@@ -119,12 +139,26 @@ int main(int argc,char *argv[])
 		exit(1);
 	}
 	if(mode == READ)
-		FP = fopen(path,"r");
+	{
+		OFP = fopen(path,"r");
+		path = strcat(path,"_tmp");
+		FP = fopen(path,"w+");
+		fcopy(FP,OFP);
+	}
+
 	if(mode == BOTH || mode ==NEW)
-		FP = fopen(path,"r+");
+	{
+		OFP = fopen(path,"r+");
+		path = strcat(path,"_tmp");
+		FP = fopen(path,"w+");
+		fcopy(FP,OFP);
+	}
 	
 	clear_screen();	
 	process();
+	fclose(OFP);
+	fclose(FP);
+	frm(path);
 	clear_screen();
 	return 0;
 }

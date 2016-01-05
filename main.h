@@ -51,7 +51,7 @@ struct buffer{
 	char buf[10];
 	int size;
 };
-extern FILE *FP;
+extern FILE *FP,*OFP;
 extern struct state cur_state;
 extern struct buffer inbuffer;
 
@@ -59,4 +59,5 @@ extern void addinbuffer(char c);
 extern void clearinbuffer();
 
 extern void text_info();
+extern void fcopy(FILE *tfp,FILE *sfp);
 #endif
