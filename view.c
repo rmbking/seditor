@@ -112,6 +112,7 @@ void display(int start_line)
 	int cur_row,cur_col;
 	char tmp_str[100];
 
+	CURSOR_HIDE();
 	clear_screen();
 	fseek(FP,0,SEEK_SET);
 
@@ -158,6 +159,7 @@ void display(int start_line)
 	if(cur_state.view_mode & LINESHOW )	//if the number of line needs to be shown
 		line_number_list();
 	text_info();
+	CURSOR_SHOW();
 }
 int view()
 {

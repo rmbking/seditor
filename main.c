@@ -29,18 +29,6 @@ void clear_screen()
 	printf("\033[2J\033[1;1H");
 #endif
 }
-void mouse_hide()
-{
-#ifdef LINUX
-	printf("\033[?25l");
-#endif
-}
-void mouse_show()
-{
-#ifdef LINUX
-	printf("\033[?25h");
-#endif
-}
 void init()
 {
 	memset(&cur_state,0,sizeof(cur_state));	
@@ -158,7 +146,7 @@ int main(int argc,char *argv[])
 	process();
 	fclose(OFP);
 	fclose(FP);
-	frm(path);
+//	frm(path);
 	clear_screen();
 	return 0;
 }
