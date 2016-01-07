@@ -33,6 +33,12 @@
 #define MAX_SCREEN_HEIGHT 100
 #define MAX_SCREEN_WIDTH 200
 #define Ctl(x) (x - 'a' + 1)
+struct file_line{
+	int line_end;
+	int line_row;
+	int line_size;	//size / 256
+	char *character;	
+};
 struct state{
 	int total_line;
 	int start_line;
@@ -45,7 +51,7 @@ struct state{
 	int last_row;
 	int cur_col;
 	int line_endpos[MAX_SCREEN_HEIGHT];	
-	char character[MAX_SCREEN_HEIGHT][MAX_SCREEN_WIDTH];
+	struct flie_line *line;
 };
 struct buffer{
 	char buf[10];

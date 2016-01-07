@@ -17,15 +17,15 @@ void next(char c,int *row,int *col)
 		*col = (*col + TABLEN - cur_state.start_pos) / TABLEN * TABLEN  + cur_state.start_pos;
 		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
 		{	
-			for(i = tmp_col; i < *col && i <= cur_state.win_width; i++)
-				cur_state.character[*row][i] = '\t';
+	//		for(i = tmp_col; i < *col && i <= cur_state.win_width; i++)
+	//			cur_state.character[*row][i] = '\t';
 		}
 	}
 	else if(c == '\n') {
 		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
 		{
 			cur_state.line_endpos[*row] = *col;
-			cur_state.character[*row][*col] = '\n';
+	//		cur_state.character[*row][*col] = '\n';
 		}
 		if(change_line == 1)	//avoid the cursor moving down twice when reading the '\n' at the end of screen row.
 		{
@@ -35,8 +35,8 @@ void next(char c,int *row,int *col)
 	}
 	else
 	{
-		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
-			cur_state.character[*row][*col] = c;
+	//	if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
+	//		cur_state.character[*row][*col] = c;
 		(*col)++;
 	}
 	if(*col > cur_state.win_width)
@@ -69,8 +69,12 @@ void state_init()
 {
 	char word;
 	int cur_row,cur_col;
-	int tmp;
 	struct winsize win;
+	static base_line = 1024;
+	static base_line_width = 256;
+	struct file_line char_buf;
+	struct file_line *line_buf;
+	int line = 1;
 
 	cur_row = 1;
 	cur_col = cur_state.start_pos;
@@ -80,8 +84,67 @@ void state_init()
 	cur_state.win_height = win.ws_row;
 	cur_state.win_width = win.ws_col;
 
+	//the pointer of the memory storing all the pointers of lines.
+	line_buf = (struct file_line *)malloc(base_line * sizeof (struct file_line));
+	if(line_buf  == NULL)
+	{
+		printf("malloc error at function:%s line: %d.\n",__FUNCTION__,__LINE__);
+		exit(-1);
+	}
+	
+	//the pointer of the memory storing all the characters of the line.
+	char_buf.character = (char *) malloc(base_line_width * sizeof (char));
+	if(char_buf.character  == NULL)
+	{
+		printf("malloc error at function:%s line: %d.\n",__FUNCTION__,__LINE__);
+		exit(-1);
+	}
+	char_buf.character[0] = '+';	//just for debug
+	char_buf.line_size = 1;	//times of original size (256) 
+	char_buf.line_row = 1;	//columns occupied,modified when displaying if necessary.
+	char_buf.line_end = 1;	//index of element waiting to be written.
+	
 	while((word = fgetc(FP)) != EOF) 
+	{
+
+		if(char_buf.line_end >= lengthof(char_buf))	
+		{
+			char_buf.line_size *= 2;
+			char_buf.character = (char *) realloc(char_buf.character,lengthof(char_buf));
+			if(char_buf.character  == NULL)
+			{
+				printf("realloc error at function:%s line: %d.\n",__FUNCTION__,__LINE__);
+				exit(-1);
+			}
+		}
+		writeto(char_buf,word);
+		char_buf.line_end++;
+		if(word == '\n')	
+		{
+			line_buf[line++] = char_buf;
+			if(line >= base_line)
+			{
+				base_line *= 2;
+				line_buf = (struct file_line *)realloc(line_buf,base_line * sizeof (struct file_line));
+				if(char_buf.character  == NULL)
+				{
+					printf("realloc error at function:%s line: %d.\n",__FUNCTION__,__LINE__);
+					exit(-1);
+				}
+			}
+			char_buf.character = (char *)malloc(base_line_width * sizeof (char));
+			if(char_buf.character  == NULL)
+			{
+				printf("malloc error at function:%s line: %d.\n",__FUNCTION__,__LINE__);
+				exit(-1);
+			}
+			char_buf.character[0] = '+';	//just for debug
+			char_buf.line_size = 1;	//times of original size (256) 
+			char_buf.line_row = 1;	//columns occupied,modified when displaying if necessary.
+			char_buf.line_end = 1;	//index of element waiting to be written.
+		}
 		next(word,&cur_row,&cur_col);
+	}
 	cur_state.total_line =cur_row-1;
 
 	memset(&inbuffer,0,sizeof(inbuffer));
@@ -349,6 +412,7 @@ int view()
 			case 'd':printf("%d",cur_state.start_pos);break;
 			case 'e':printf("%d",cur_state.line_endpos[cur_state.cur_row]);break;
 			case 'c':
+					 /*
 					 for(i = 1 ; i < cur_state.line_endpos[cur_state.cur_row - 1]; i++)
 						 if(cur_state.character[cur_state.cur_row-1][i] == '\t')
 							 putchar('t');
@@ -357,6 +421,7 @@ int view()
 							 putchar('n');
 						 else 
 						 putchar(cur_state.character[cur_state.cur_row-1][i]);
+						 */
 					 break;
 			/*for debug*/
             default:
