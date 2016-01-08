@@ -51,7 +51,7 @@ struct state{
 	int last_row;
 	int cur_col;
 	int line_endpos[MAX_SCREEN_HEIGHT];	
-	struct flie_line *line;
+	struct file_line *line;
 };
 struct buffer{
 	char buf[10];

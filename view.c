@@ -22,7 +22,7 @@ void next(char c,int *row,int *col)
 		}
 	}
 	else if(c == '\n') {
-		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
+		if(*row < MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
 		{
 			cur_state.line_endpos[*row] = *col;
 	//		cur_state.character[*row][*col] = '\n';
@@ -104,9 +104,10 @@ void state_init()
 	char_buf.line_row = 1;	//columns occupied,modified when displaying if necessary.
 	char_buf.line_end = 1;	//index of element waiting to be written.
 	
-	while((word = fgetc(FP)) != EOF) 
+	while(1) 
 	{
 
+		word = fgetc(FP);
 		if(char_buf.line_end >= lengthof(char_buf))	
 		{
 			char_buf.line_size *= 2;
@@ -143,8 +144,11 @@ void state_init()
 			char_buf.line_row = 1;	//columns occupied,modified when displaying if necessary.
 			char_buf.line_end = 1;	//index of element waiting to be written.
 		}
+		if(word == EOF)
+			break;
 		next(word,&cur_row,&cur_col);
 	}
+	cur_state.line = line_buf;
 	cur_state.total_line =cur_row-1;
 
 	memset(&inbuffer,0,sizeof(inbuffer));
@@ -165,6 +169,20 @@ void prepro()
 		cur_state.start_pos = 1;
 	cur_state.cur_col =  cur_state.cur_col + cur_state.start_pos - 1;
 }
+static int line;
+static int pos;
+char getc_from_buf()
+{
+	char word = cur_state.line[line].character[pos];
+	if(cur_state.line[line].character[pos] != '\n')
+		pos++;
+	else
+	{
+		line++;
+		pos = 1;
+	}
+	return word;
+}
 /*not change about the cur_state content but line_endpos and last_row*/
 
 void display(int start_line)
@@ -178,6 +196,8 @@ void display(int start_line)
 	CURSOR_HIDE();
 	clear_screen();
 	fseek(FP,0,SEEK_SET);
+	line = 1;
+	pos = 1;
 
 	cur_row = 1;
 	cur_col = 1;
@@ -197,7 +217,7 @@ void display(int start_line)
 			cur_row = 1;
 			cur_col = cur_state.start_pos;
 		}
-		if((word = fgetc(FP)) != EOF) 
+		if((word = getc_from_buf()) != EOF) 
 		{
 			next(word,&cur_row,&cur_col);
 			if(start)
