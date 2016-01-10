@@ -54,6 +54,7 @@ struct state{
 	int cur_index;
 	int line_endpos[MAX_SCREEN_HEIGHT];	
 	struct file_line *line;
+//	int map[MAX_SCREEN_HEIGHT][MAX_SCREEN_WIDTH];	//screen point to charcater index.
 };
 struct buffer{
 	char buf[10];

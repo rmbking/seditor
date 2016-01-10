@@ -24,15 +24,14 @@ void CheckCursor()
 		CURSOR_MOVE(cur_state.cur_row,cur_state.start_pos);
 		cur_state.cur_col = cur_state.start_pos;
 	}
-	/*
-	if(cur_state.character[cur_state.cur_row][cur_state.cur_col] == '\t')
+	if(cur_state.line[cur_state.cur_line].character[cur_state.cur_index] == '\t')
 	{
 		cur_state.cur_col = (cur_state.cur_col + TABLEN - 1) / TABLEN * TABLEN;	
 		CURSOR_MOVE(cur_state.cur_row,cur_state.cur_col);
 	}
-	*/
 
 }
+static int row_of_line = 1;
 void CursorUp(int line)
 {
 	while(line--)
@@ -56,7 +55,6 @@ void CursorUp(int line)
 	}
 
 	CheckCursor();
-	
 }
 void CursorDown(int line)
 {
@@ -96,7 +94,8 @@ void CursorLeft(int character)
 		}
 		else
 		{
-			cur_state.cur_col -= TABLEN;
+			if(cur_state.cur_col > TABLEN)
+				cur_state.cur_col -= TABLEN;
 			k = TABLEN;
 			while(k--)
 				CURSOR_LEFT();
@@ -117,6 +116,8 @@ void CursorRight(int character)
 		CURSOR_RIGHT();
 		character--;
 	}
+	if(cur_state.cur_index < cur_state.line[cur_state.cur_line].line_end)
+		cur_state.cur_index ++;
 	cur_state.cur_pos = cur_state.cur_col;
 	CheckCursor();
 }

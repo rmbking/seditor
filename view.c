@@ -6,15 +6,19 @@
 #include "main.h"
 #include "cursor.h"
 
-void next(char c,int *row,int *col,int *row_of_line)
+void next(char c,int index,int *row,int *col,int *row_of_line)
 {
 	int i;
-	int tmp_row,tmp_col;
+	int start_col;
 	static char change_line = 1;
 	if(c == '\t') 
 	{
-		tmp_col = *col;	
+		start_col = *col;	
 		*col = (*col + TABLEN - cur_state.start_pos) / TABLEN * TABLEN  + cur_state.start_pos;
+		/*to be extended...
+		for(i = start_col; i < *col && i <= cur_state.win_width; i++)
+			cur_state.map[*row][i] = index;
+		******************/
 	}
 	else if(c == '\n') {
 		if(*row < MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
@@ -23,12 +27,14 @@ void next(char c,int *row,int *col,int *row_of_line)
 		}
 		if(change_line == 1)	//avoid the cursor moving down twice when reading the '\n' at the end of screen row.
 		{
+//			cur_state.map[*row][*col] = index;
 			(*row) ++;
 			*col = cur_state.start_pos;
 		}
 	}
 	else
 	{
+//		cur_state.map[*row][*col] = index;
 		(*col)++;
 	}
 	if(*col > cur_state.win_width)
@@ -111,6 +117,7 @@ void state_init()
 		char_buf.line_end++;
 		if(word == '\n')	
 		{
+			char_buf.line_end--;	//line_end points to the '\n'	
 			line_buf[line++] = char_buf;
 			if(line >= base_line)
 			{
@@ -185,6 +192,7 @@ void display(int start_line)
 	char word;
 	int cur_row,cur_col;
 	int row_of_line;
+	int index;	//store the index of the reading character for .map
 	CURSOR_HIDE();
 	clear_screen();
 	line = start_line;
@@ -192,15 +200,16 @@ void display(int start_line)
 	row_of_line = 1;
 
 	cur_row = 1;
-	cur_col = 1;
+	cur_col = cur_state.start_pos;
 	cur_state.last_row = cur_state.win_height - 1;
+	index = pos;
 
 	CURSOR_MOVE(1,cur_state.start_pos);
 	while(1)
 	{
 		if((word = getc_from_buf()) != EOF) 
 		{
-			next(word,&cur_row,&cur_col,&row_of_line);
+			next(word,index,&cur_row,&cur_col,&row_of_line);
 
 			if(word == '\n')
 			{
@@ -223,6 +232,7 @@ void display(int start_line)
 		}
 		if(cur_row == cur_state.win_height )	
 			break;
+		index = pos;
 	}
 	if(cur_state.view_mode & LINESHOW )	//if the number of line needs to be shown
 		line_number_list();
@@ -255,6 +265,7 @@ int view()
 		state_init();
 		display(1);
 		CURSOR_MOVE(1,1);
+		CheckCursor();
 	}
 	else if (modified_mode & LINESHOW)
 	{
@@ -295,11 +306,19 @@ int view()
 			 		 clearinbuffer();
 					 break;
 			case 'j':
-					 CursorDown(1);
+					 if(cur_state.cur_line < cur_state.total_line)
+					 {
+					 	CursorDown(cur_state.line[cur_state.cur_line].line_size);
+					 	cur_state.cur_line ++;
+					 }
 			 		 clearinbuffer();
 					 break;
 			case 'k':
-					 CursorUp(1);
+					 if(cur_state.cur_line > 1)
+					 {
+					 	CursorUp(cur_state.line[cur_state.cur_line - 1].line_size);
+					 	cur_state.cur_line --;
+					 }
 			 		 clearinbuffer();
 					 break;
 			case 'l':
@@ -419,6 +438,8 @@ int view()
 			case 'd':printf("%d",cur_state.start_pos);break;
 			case 'e':printf("%d",cur_state.line_endpos[cur_state.cur_row]);break;
 			case 'c':
+					 printf("%d %d",cur_state.cur_line,cur_state.cur_index);
+					 fflush(stdout);
 					 /*
 					 for(i = 1 ; i < cur_state.line_endpos[cur_state.cur_row - 1]; i++)
 						 if(cur_state.character[cur_state.cur_row-1][i] == '\t')
