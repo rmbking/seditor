@@ -50,6 +50,8 @@ struct state{
 	int cur_row;
 	int last_row;
 	int cur_col;
+	int cur_line;
+	int cur_index;
 	int line_endpos[MAX_SCREEN_HEIGHT];	
 	struct file_line *line;
 };

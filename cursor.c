@@ -87,15 +87,13 @@ void CursorLeft(int character)
 	int k;
 	while(cur_state.cur_col > cur_state.start_pos && character > 0)
 	{
-		/*
-		if(cur_state.character[cur_state.cur_row][cur_state.cur_col] != '\t')
-		*/
+		
+		if(cur_state.line[cur_state.cur_line].character[cur_state.cur_index] != '\t')
 		{
 			cur_state.cur_col--;
 			CURSOR_LEFT();
 			character--;
 		}
-		/*
 		else
 		{
 			cur_state.cur_col -= TABLEN;
@@ -104,7 +102,9 @@ void CursorLeft(int character)
 				CURSOR_LEFT();
 			character--;
 		}
-		*/
+
+		if(cur_state.cur_index > 1)
+			cur_state.cur_index --;
 	}
 	cur_state.cur_pos = cur_state.cur_col;	//used for cursor up-moving and down-moving
 	CheckCursor();

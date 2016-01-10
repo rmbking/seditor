@@ -6,7 +6,7 @@
 #include "main.h"
 #include "cursor.h"
 
-void next(char c,int *row,int *col)
+void next(char c,int *row,int *col,int *row_of_line)
 {
 	int i;
 	int tmp_row,tmp_col;
@@ -15,17 +15,11 @@ void next(char c,int *row,int *col)
 	{
 		tmp_col = *col;	
 		*col = (*col + TABLEN - cur_state.start_pos) / TABLEN * TABLEN  + cur_state.start_pos;
-		if(*row < MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
-		{	
-	//		for(i = tmp_col; i < *col && i <= cur_state.win_width; i++)
-	//			cur_state.character[*row][i] = '\t';
-		}
 	}
 	else if(c == '\n') {
 		if(*row < MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
 		{
 			cur_state.line_endpos[*row] = *col;
-	//		cur_state.character[*row][*col] = '\n';
 		}
 		if(change_line == 1)	//avoid the cursor moving down twice when reading the '\n' at the end of screen row.
 		{
@@ -35,8 +29,6 @@ void next(char c,int *row,int *col)
 	}
 	else
 	{
-	//	if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
-	//		cur_state.character[*row][*col] = c;
 		(*col)++;
 	}
 	if(*col > cur_state.win_width)
@@ -46,6 +38,7 @@ void next(char c,int *row,int *col)
 		*col = *col - cur_state.win_width + cur_state.start_pos - 1;
 		change_line = 0;
 		(*row) ++;
+		(*row_of_line)++;
 	}
 	else 
 		change_line = 1;	
@@ -68,16 +61,12 @@ void line_number_list()
 void state_init()
 {
 	char word;
-	int cur_row,cur_col;
 	struct winsize win;
 	static base_line = 1024;
 	static base_line_width = 256;
 	struct file_line char_buf;
 	struct file_line *line_buf;
 	int line = 1;
-
-	cur_row = 1;
-	cur_col = cur_state.start_pos;
 
 	fseek(FP,0,SEEK_SET);
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
@@ -145,11 +134,13 @@ void state_init()
 			char_buf.line_end = 1;	//index of element waiting to be written.
 		}
 		if(word == EOF)
+		{
+			line--;
 			break;
-		next(word,&cur_row,&cur_col);
+		}
 	}
 	cur_state.line = line_buf;
-	cur_state.total_line =cur_row-1;
+	cur_state.total_line = line;
 
 	memset(&inbuffer,0,sizeof(inbuffer));
 }
@@ -159,7 +150,7 @@ int digit_len(int number)
 	sprintf(line_str,"%d",cur_state.total_line);
 	return strlen(line_str);
 }
-void prepro()
+void prepro()	//to be rewritten.....................................
 {
 	if(cur_state.view_mode & LINESHOW)
 	{
@@ -173,7 +164,11 @@ static int line;
 static int pos;
 char getc_from_buf()
 {
-	char word = cur_state.line[line].character[pos];
+	char word;
+	if(line > cur_state.total_line) 
+		return EOF;
+
+  	word = cur_state.line[line].character[pos];
 	if(cur_state.line[line].character[pos] != '\n')
 		pos++;
 	else
@@ -188,47 +183,37 @@ char getc_from_buf()
 void display(int start_line)
 {
 	char word;
-	int start;	//start flag to print
-	int end;	//end flag to print
 	int cur_row,cur_col;
-	char tmp_str[100];
-
+	int row_of_line;
 	CURSOR_HIDE();
 	clear_screen();
-	fseek(FP,0,SEEK_SET);
-	line = 1;
+	line = start_line;
 	pos = 1;
+	row_of_line = 1;
 
 	cur_row = 1;
 	cur_col = 1;
-	start = 0;
-	end = 0;
 	cur_state.last_row = cur_state.win_height - 1;
 
 	CURSOR_MOVE(1,cur_state.start_pos);
 	while(1)
 	{
-		word = EOF;
-		/*locate the first output line and set out flag*/
-		if(cur_row == start_line && start  == 0)
-		{
-			start = 1;
-			end = 1;		//fix the bug when the start_line reaches the same line as screen rows.
-			cur_row = 1;
-			cur_col = cur_state.start_pos;
-		}
 		if((word = getc_from_buf()) != EOF) 
 		{
-			next(word,&cur_row,&cur_col);
-			if(start)
+			next(word,&cur_row,&cur_col,&row_of_line);
+
+			if(word == '\n')
 			{
-				if(word != '\t' && word != '\n')
-					putchar(word);
-//				else	//to prove the long line jumps to the proper position of next line.
-					CURSOR_MOVE(cur_row,cur_col);
+				cur_state.line[line - 1].line_size = row_of_line;
+				row_of_line = 1;
 			}
+			else if(word != '\t')
+				putchar(word);
+
+
+			CURSOR_MOVE(cur_row,cur_col);
 		}
-		else if(cur_row < cur_state.win_height && start)
+		else if(cur_row < cur_state.win_height )
 		{
 			if(cur_state.last_row > cur_row - 1)
 				cur_state.last_row = cur_row - 1;	//record the previous line of the first ~line
@@ -236,7 +221,7 @@ void display(int start_line)
 			cur_state.line_endpos[cur_row] = cur_col;
 			cur_row++;
 		}
-		if(cur_row == cur_state.win_height && end)		//add the latter condition to fix the bug as above
+		if(cur_row == cur_state.win_height )	
 			break;
 	}
 	if(cur_state.view_mode & LINESHOW )	//if the number of line needs to be shown
@@ -265,6 +250,8 @@ int view()
 		cur_state.cur_col = 1;
 		cur_state.start_line = 1;
 		cur_state.cur_pos = 1;
+		cur_state.cur_line = 1;
+		cur_state.cur_index = 1;
 		state_init();
 		display(1);
 		CURSOR_MOVE(1,1);
@@ -345,7 +332,7 @@ int view()
 					}
 					cur_state.cur_row = cur_state.last_row;
 					cur_state.cur_col = cur_state.start_pos;
-					CURSOR_MOVE(cur_state.last_row,cur_state.start_pos);
+					//CURSOR_MOVE(cur_state.last_row,cur_state.start_pos);
 			 		clearinbuffer();
 					break;
 			case Ctl('f'):
