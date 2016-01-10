@@ -15,7 +15,7 @@ void next(char c,int *row,int *col)
 	{
 		tmp_col = *col;	
 		*col = (*col + TABLEN - cur_state.start_pos) / TABLEN * TABLEN  + cur_state.start_pos;
-		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
+		if(*row < MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
 		{	
 	//		for(i = tmp_col; i < *col && i <= cur_state.win_width; i++)
 	//			cur_state.character[*row][i] = '\t';
@@ -41,7 +41,7 @@ void next(char c,int *row,int *col)
 	}
 	if(*col > cur_state.win_width)
 	{
-		if(*row <= MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
+		if(*row < MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
 			cur_state.line_endpos[*row] = cur_state.win_width;
 		*col = *col - cur_state.win_width + cur_state.start_pos - 1;
 		change_line = 0;
