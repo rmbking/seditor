@@ -39,7 +39,7 @@ void init()
 void text_info()
 {
 	int cur_line;
-	cur_line = cur_state.start_line + cur_state.cur_row - 1;
+	cur_line = cur_state.cur_line;
 	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-20);
 	printf("                    ");
 	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-20);

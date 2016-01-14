@@ -31,6 +31,8 @@ void next(char c,int index,int *row,int *col,int *row_of_line)
 			(*row) ++;
 			*col = cur_state.start_pos;
 		}
+		else
+			(*row_of_line)--;
 	}
 	else
 	{
@@ -59,7 +61,7 @@ void line_number_list()
 	{
 		CURSOR_MOVE(cur_row,1);
 		printf(format,line_no);
-		cur_row++;
+		cur_row += cur_state.line[line_no].line_row;
 		line_no++;
 	}
 	
@@ -192,12 +194,14 @@ void display(int start_line)
 	char word;
 	int cur_row,cur_col;
 	int row_of_line;
+	int end_flag;
 	int index;	//store the index of the reading character for .map
 	CURSOR_HIDE();
 	clear_screen();
 	line = start_line;
 	pos = 1;
 	row_of_line = 1;
+	end_flag = 0;
 
 	cur_row = 1;
 	cur_col = cur_state.start_pos;
@@ -213,14 +217,16 @@ void display(int start_line)
 
 			if(word == '\n')
 			{
-				cur_state.line[line - 1].line_size = row_of_line;
+				cur_state.line[line - 1].line_row = row_of_line;
 				row_of_line = 1;
+				if(end_flag)
+					break;
 			}
-			else if(word != '\t')
+			else if(word != '\t' && !end_flag)
 				putchar(word);
 
-
-			CURSOR_MOVE(cur_row,cur_col);
+			if(!end_flag)
+				CURSOR_MOVE(cur_row,cur_col);
 		}
 		else if(cur_row < cur_state.win_height )
 		{
@@ -231,7 +237,12 @@ void display(int start_line)
 			cur_row++;
 		}
 		if(cur_row == cur_state.win_height )	
-			break;
+		{
+			if(word == '\n')
+				break;
+			else
+				end_flag = 1;	//finish reading the last line to get the rows but not write to the screen.
+		}
 		index = pos;
 	}
 	if(cur_state.view_mode & LINESHOW )	//if the number of line needs to be shown
@@ -308,16 +319,14 @@ int view()
 			case 'j':
 					 if(cur_state.cur_line < cur_state.total_line)
 					 {
-					 	CursorDown(cur_state.line[cur_state.cur_line].line_size);
-					 	cur_state.cur_line ++;
+					 	CursorDown(cur_state.line[cur_state.cur_line].line_row);
 					 }
 			 		 clearinbuffer();
 					 break;
 			case 'k':
 					 if(cur_state.cur_line > 1)
 					 {
-					 	CursorUp(cur_state.line[cur_state.cur_line - 1].line_size);
-					 	cur_state.cur_line --;
+					 	CursorUp(cur_state.line[cur_state.cur_line - 1].line_row);
 					 }
 			 		 clearinbuffer();
 					 break;
@@ -439,6 +448,7 @@ int view()
 			case 'e':printf("%d",cur_state.line_endpos[cur_state.cur_row]);break;
 			case 'c':
 					 printf("%d %d",cur_state.cur_line,cur_state.cur_index);
+					 printf(" %d %d",cur_state.line[cur_state.cur_line].line_size,cur_state.line[cur_state.cur_line].line_row);
 					 fflush(stdout);
 					 /*
 					 for(i = 1 ; i < cur_state.line_endpos[cur_state.cur_row - 1]; i++)

@@ -53,11 +53,12 @@ void CursorUp(int line)
 			}
 		}
 	}
-
+	cur_state.cur_line--;
 	CheckCursor();
 }
 void CursorDown(int line)
 {
+	int back_row;
 	while(line--)
 	{
 		if(cur_state.cur_row < cur_state.win_height - 1)
@@ -68,16 +69,18 @@ void CursorDown(int line)
 		}
 		else
 		{
-			if(cur_state.start_line + cur_state.win_height - 2 < cur_state.total_line)
+			if(cur_state.start_line  <= cur_state.total_line)
 			{
+				back_row = cur_state.line[cur_state.start_line].line_row;	//start_line.row > 1 ,so move back the cursor
 				cur_state.start_line++;
 				display(cur_state.start_line);
-				CURSOR_MOVE(cur_state.win_height-1,cur_state.cur_pos);
+				cur_state.cur_row = cur_state.win_height-back_row;
 				cur_state.cur_col = cur_state.cur_pos;
+				CursorMove();
 			}
 		}
 	}
-
+	cur_state.cur_line++;
 	CheckCursor();
 }
 void CursorLeft(int character)
@@ -121,9 +124,9 @@ void CursorRight(int character)
 	cur_state.cur_pos = cur_state.cur_col;
 	CheckCursor();
 }
-void CursorMove(int row,int col)
+void CursorMove()
 {
-
+	CURSOR_MOVE(cur_state.cur_row,cur_state.cur_col);
 }
 void CursorLocate(int *row,int *col)
 {
