@@ -206,6 +206,7 @@ void display(int start_line)
 	cur_row = 1;
 	cur_col = cur_state.start_pos;
 	cur_state.last_row = cur_state.win_height - 1;
+	cur_state.last_line = cur_state.start_line - 1;
 	index = pos;
 
 	CURSOR_MOVE(1,cur_state.start_pos);
@@ -217,6 +218,7 @@ void display(int start_line)
 
 			if(word == '\n')
 			{
+				cur_state.last_line++;
 				cur_state.line[line - 1].line_row = row_of_line;
 				row_of_line = 1;
 				if(end_flag)
@@ -338,6 +340,7 @@ int view()
 					if(inbuffer.buf[inbuffer.size-1] == 'g')
 					{
 						cur_state.start_line = 1;
+						cur_state.cur_line = 1;
 						display(1);
 						cur_state.cur_row = 1;
 						cur_state.cur_col = cur_state.start_pos;
@@ -352,6 +355,11 @@ int view()
 					{
 						cur_state.start_line = cur_state.total_line - cur_state.win_height + 2;
 						display(cur_state.total_line - cur_state.win_height + 2);
+						while(cur_state.last_line < cur_state.total_line)
+						{
+					 		CursorDown(cur_state.total_line-cur_state.last_line);
+						}
+						cur_state.cur_line = cur_state.total_line;
 					}
 					else
 					{
