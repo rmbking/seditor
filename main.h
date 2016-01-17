@@ -71,4 +71,5 @@ extern void clearinbuffer();
 extern void text_info();
 extern void fcopy(FILE *tfp,FILE *sfp);
 extern int frm(char *fullname);
+extern void btof(FILE *fp);
 #endif

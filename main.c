@@ -114,6 +114,34 @@ int frm(char *path)
 		return	-1;
    return 0;	
 }
+void btof(FILE *fp)
+{
+	int fd;
+	int line;
+	int index;
+	char word;
+	fd = fileno(fp);
+	if(ftruncate(fd,0) == -1)	//truncation does not change the file position.
+	{
+		printf("error ftruncate.\n");
+		exit(-1);
+	}	
+	line = 1;
+	index = 1;
+	fseek(fp,0,SEEK_SET);
+	while(line <= cur_state.total_line)	
+	{
+		word = cur_state.line[line].character[index]; 
+		if(word != '\n')
+			index++;
+		else
+		{
+			line++;
+			index = 1;
+		}
+		fputc(word,fp);
+	}
+}
 int main(int argc,char *argv[])
 {
 	char *path;
@@ -144,6 +172,7 @@ int main(int argc,char *argv[])
 	
 	clear_screen();	
 	process();
+	btof(FP);
 	fclose(OFP);
 	fclose(FP);
 //	frm(path);
