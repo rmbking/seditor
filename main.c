@@ -5,9 +5,10 @@
 #include "control.h"
 
 FILE *FP,*OFP;
-struct state cur_state;
+//struct state cur_state;
 struct buffer inbuffer;
 struct file file;
+struct screen screen;
 void addinbuffer(char c)
 {
 	int k;
@@ -32,23 +33,24 @@ void clear_screen()
 }
 void init()
 {
-	memset(&cur_state,0,sizeof(cur_state));	
-	cur_state.start_line = 1;
-	cur_state.cur_pos = 1;
-	cur_state.start_pos = 1;
+	memset(&file,0,sizeof(file));	
+	memset(&screen,0,sizeof(screen));	
+	file.start_line = 1;
+	screen.cur_pos = 1;
+	screen.start_pos = 1;
 }
 void text_info()
 {
 	int cur_line;
 	cur_line = file.cur_line;
-	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-20);
+	CURSOR_MOVE(screen.win_height,screen.win_width-20);
 	printf("                    ");
-	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-20);
+	CURSOR_MOVE(screen.win_height,screen.win_width-20);
 	printf("line:%d %d",cur_line,file.cur_index);
-	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-5);
+	CURSOR_MOVE(screen.win_height,screen.win_width-5);
 	printf("%d%%",cur_line * 100 / file.total_line);
 
-	CURSOR_MOVE(cur_state.cur_row,cur_state.cur_col);
+	CURSOR_MOVE(screen.cur_row,screen.cur_col);
 }
 void check(int *mode,char * path)
 {

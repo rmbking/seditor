@@ -41,6 +41,7 @@ struct file_line{
 };
 struct file{
 	int open_mode;
+	int start_line;
 	int total_line;
 	int cur_line;
 	int cur_index;
@@ -59,6 +60,7 @@ struct screen{
 	int row_end[MAX_SCREEN_HEIGHT];
 	int map[MAX_SCREEN_HEIGHT][MAX_SCREEN_WIDTH];
 };
+/*
 struct state{
 	int total_line;
 	int start_line;
@@ -77,6 +79,7 @@ struct state{
 	struct file_line *line;
 //	int map[MAX_SCREEN_HEIGHT][MAX_SCREEN_WIDTH];	//screen point to charcater index.
 };
+*/
 struct buffer{
 	char buf[10];
 	int size;
@@ -84,6 +87,7 @@ struct buffer{
 extern FILE *FP,*OFP;
 extern struct state cur_state;
 extern struct file file;
+extern struct screen screen;
 extern struct buffer inbuffer;
 
 extern void addinbuffer(char c);

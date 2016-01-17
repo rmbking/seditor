@@ -7,27 +7,27 @@
 void CheckCursor()
 {
 
-	if(cur_state.cur_row > cur_state.last_row)
+	if(screen.cur_row > screen.last_row)
 	{
-		CURSOR_MOVE(cur_state.last_row,cur_state.start_pos);
-		cur_state.cur_row = cur_state.last_row;
+		CURSOR_MOVE(screen.last_row,screen.start_pos);
+		screen.cur_row = screen.last_row;
 	}
 
-	if(cur_state.line_endpos[cur_state.cur_row] < cur_state.cur_col)	//not move the cursor to the position where no character exits.
+	if(screen.row_end[screen.cur_row] < screen.cur_col)	//not move the cursor to the position where no character exits.
 	{
-		CURSOR_MOVE(cur_state.cur_row,cur_state.line_endpos[cur_state.cur_row]);
-		cur_state.cur_col = cur_state.line_endpos[cur_state.cur_row];
+		CURSOR_MOVE(screen.cur_row,screen.row_end[screen.cur_row]);
+		screen.cur_col = screen.row_end[screen.cur_row];
 	}
 
-	if(cur_state.view_mode & LINESHOW && cur_state.cur_col < cur_state.start_pos)
+	if(screen.view_mode & LINESHOW && screen.cur_col < screen.start_pos)
 	{
-		CURSOR_MOVE(cur_state.cur_row,cur_state.start_pos);
-		cur_state.cur_col = cur_state.start_pos;
+		CURSOR_MOVE(screen.cur_row,screen.start_pos);
+		screen.cur_col = screen.start_pos;
 	}
 	if(file.line[file.cur_line].character[file.cur_index] == '\t')
 	{
-		cur_state.cur_col = (cur_state.cur_col + TABLEN - 1) / TABLEN * TABLEN;	
-		CURSOR_MOVE(cur_state.cur_row,cur_state.cur_col);
+		screen.cur_col = (screen.cur_col + TABLEN - 1) / TABLEN * TABLEN;	
+		CURSOR_MOVE(screen.cur_row,screen.cur_col);
 	}
 
 }
@@ -36,20 +36,20 @@ void CursorUp(int line)
 {
 	while(line--)
 	{
-		if(cur_state.cur_row > 1)	
+		if(screen.cur_row > 1)	
 		{
-			cur_state.cur_row--;
-			CURSOR_MOVE(cur_state.cur_row,cur_state.cur_pos);
-			cur_state.cur_col = cur_state.cur_pos;
+			screen.cur_row--;
+			CURSOR_MOVE(screen.cur_row,screen.cur_pos);
+			screen.cur_col = screen.cur_pos;
 		}
 		else
 		{
-			if(cur_state.start_line > 1)
+			if(file.start_line > 1)
 			{
-				cur_state.start_line--;
-				display(cur_state.start_line);
-				CURSOR_MOVE(1,cur_state.cur_pos);
-				cur_state.cur_col = cur_state.cur_pos;
+				file.start_line--;
+				display(file.start_line);
+				CURSOR_MOVE(1,screen.cur_pos);
+				screen.cur_col = screen.cur_pos;
 			}
 		}
 	}
@@ -61,21 +61,21 @@ void CursorDown(int line)
 	int back_row;
 	while(line--)
 	{
-		if(cur_state.cur_row < cur_state.win_height - 1)
+		if(screen.cur_row < screen.win_height - 1)
 		{
-			cur_state.cur_row++;
-			CURSOR_MOVE(cur_state.cur_row,cur_state.cur_pos);
-			cur_state.cur_col = cur_state.cur_pos;
+			screen.cur_row++;
+			CURSOR_MOVE(screen.cur_row,screen.cur_pos);
+			screen.cur_col = screen.cur_pos;
 		}
 		else
 		{
-			if(cur_state.start_line  <= file.total_line)
+			if(file.start_line  <= file.total_line)
 			{
-				back_row = file.line[cur_state.start_line].line_row;	//start_line.row > 1 ,so move back the cursor
-				cur_state.start_line++;
-				display(cur_state.start_line);
-				cur_state.cur_row = cur_state.win_height-back_row;
-				cur_state.cur_col = cur_state.cur_pos;
+				back_row = file.line[file.start_line].line_row;	//start_line.row > 1 ,so move back the cursor
+				file.start_line++;
+				display(file.start_line);
+				screen.cur_row = screen.win_height-back_row;
+				screen.cur_col = screen.cur_pos;
 				CursorMove();
 			}
 		}
@@ -86,19 +86,19 @@ void CursorDown(int line)
 void CursorLeft(int character)
 {
 	int k;
-	while(cur_state.cur_col > cur_state.start_pos && character > 0)
+	while(screen.cur_col > screen.start_pos && character > 0)
 	{
 		
 		if(file.line[file.cur_line].character[file.cur_index] != '\t')
 		{
-			cur_state.cur_col--;
+			screen.cur_col--;
 			CURSOR_LEFT();
 			character--;
 		}
 		else
 		{
-			if(cur_state.cur_col > TABLEN)
-				cur_state.cur_col -= TABLEN;
+			if(screen.cur_col > TABLEN)
+				screen.cur_col -= TABLEN;
 			k = TABLEN;
 			while(k--)
 				CURSOR_LEFT();
@@ -108,25 +108,25 @@ void CursorLeft(int character)
 		if(file.cur_index > 1)
 			file.cur_index --;
 	}
-	cur_state.cur_pos = cur_state.cur_col;	//used for cursor up-moving and down-moving
+	screen.cur_pos = screen.cur_col;	//used for cursor up-moving and down-moving
 	CheckCursor();
 }
 void CursorRight(int character)
 {
-	while(cur_state.cur_col < cur_state.line_endpos[cur_state.cur_row] && character > 0)
+	while(screen.cur_col < screen.row_end[screen.cur_row] && character > 0)
 	{
-		cur_state.cur_col++;
+		screen.cur_col++;
 		CURSOR_RIGHT();
 		character--;
 	}
 	if(file.cur_index < file.line[file.cur_line].line_end)
 		file.cur_index ++;
-	cur_state.cur_pos = cur_state.cur_col;
+	screen.cur_pos = screen.cur_col;
 	CheckCursor();
 }
 void CursorMove()
 {
-	CURSOR_MOVE(cur_state.cur_row,cur_state.cur_col);
+	CURSOR_MOVE(screen.cur_row,screen.cur_col);
 }
 void CursorLocate(int *row,int *col)
 {

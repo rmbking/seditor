@@ -14,22 +14,22 @@ void next(char c,int index,int *row,int *col,int *row_of_line)
 	if(c == '\t') 
 	{
 		start_col = *col;	
-		*col = (*col + TABLEN - cur_state.start_pos) / TABLEN * TABLEN  + cur_state.start_pos;
+		*col = (*col + TABLEN - screen.start_pos) / TABLEN * TABLEN  + screen.start_pos;
 		/*to be extended...
-		for(i = start_col; i < *col && i <= cur_state.win_width; i++)
+		for(i = start_col; i < *col && i <= screen.win_width; i++)
 			cur_state.map[*row][i] = index;
 		******************/
 	}
 	else if(c == '\n') {
 		if(*row < MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
 		{
-			cur_state.line_endpos[*row] = *col;
+			screen.row_end[*row] = *col;
 		}
 		if(change_line == 1)	//avoid the cursor moving down twice when reading the '\n' at the end of screen row.
 		{
 //			cur_state.map[*row][*col] = index;
 			(*row) ++;
-			*col = cur_state.start_pos;
+			*col = screen.start_pos;
 		}
 		else
 			(*row_of_line)--;
@@ -39,11 +39,11 @@ void next(char c,int index,int *row,int *col,int *row_of_line)
 //		cur_state.map[*row][*col] = index;
 		(*col)++;
 	}
-	if(*col > cur_state.win_width)
+	if(*col > screen.win_width)
 	{
 		if(*row < MAX_SCREEN_HEIGHT)	//avoid the access the element of the array out of range(reading large file in state_init).
-			cur_state.line_endpos[*row] = cur_state.win_width;
-		*col = *col - cur_state.win_width + cur_state.start_pos - 1;
+			screen.row_end[*row] = screen.win_width;
+		*col = *col - screen.win_width + screen.start_pos - 1;
 		change_line = 0;
 		(*row) ++;
 		(*row_of_line)++;
@@ -54,10 +54,10 @@ void next(char c,int index,int *row,int *col,int *row_of_line)
 void line_number_list()
 {
 	char format[100];
-	int line_no = cur_state.start_line;
+	int line_no = file.start_line;
 	int cur_row = 1;
-	sprintf(format,"%%%dd ",cur_state.start_pos-2);	//a blank space follows the number
-	while(cur_row <= cur_state.win_height-1 && line_no <= file.total_line)
+	sprintf(format,"%%%dd ",screen.start_pos-2);	//a blank space follows the number
+	while(cur_row <= screen.win_height-1 && line_no <= file.total_line)
 	{
 		CURSOR_MOVE(cur_row,1);
 		printf(format,line_no);
@@ -78,8 +78,8 @@ void state_init()
 
 	fseek(FP,0,SEEK_SET);
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
-	cur_state.win_height = win.ws_row;
-	cur_state.win_width = win.ws_col;
+	screen.win_height = win.ws_row;
+	screen.win_width = win.ws_col;
 
 	//the pointer of the memory storing all the pointers of lines.
 	line_buf = (struct file_line *)malloc(base_line * sizeof (struct file_line));
@@ -161,13 +161,13 @@ int digit_len(int number)
 }
 void prepro()	//to be rewritten.....................................
 {
-	if(cur_state.view_mode & LINESHOW)
+	if(screen.view_mode & LINESHOW)
 	{
-		cur_state.start_pos = digit_len(file.total_line) + 2;
+		screen.start_pos = digit_len(file.total_line) + 2;
 	}
 	else
-		cur_state.start_pos = 1;
-	cur_state.cur_col =  cur_state.cur_col + cur_state.start_pos - 1;
+		screen.start_pos = 1;
+	screen.cur_col =  screen.cur_col + screen.start_pos - 1;
 }
 static int line;
 static int pos;
@@ -204,12 +204,12 @@ void display(int start_line)
 	end_flag = 0;
 
 	cur_row = 1;
-	cur_col = cur_state.start_pos;
-	cur_state.last_row = cur_state.win_height - 1;
-	cur_state.last_line = cur_state.start_line - 1;
+	cur_col = screen.start_pos;
+	screen.last_row = screen.win_height - 1;
+	screen.last_line = file.start_line - 1;
 	index = pos;
 
-	CURSOR_MOVE(1,cur_state.start_pos);
+	CURSOR_MOVE(1,screen.start_pos);
 	while(1)
 	{
 		if((word = getc_from_buf()) != EOF) 
@@ -218,7 +218,7 @@ void display(int start_line)
 
 			if(word == '\n')
 			{
-				cur_state.last_line++;
+				screen.last_line++;
 				file.line[line - 1].line_row = row_of_line;
 				row_of_line = 1;
 				if(end_flag)
@@ -230,15 +230,15 @@ void display(int start_line)
 			if(!end_flag)
 				CURSOR_MOVE(cur_row,cur_col);
 		}
-		else if(cur_row < cur_state.win_height )
+		else if(cur_row < screen.win_height )
 		{
-			if(cur_state.last_row > cur_row - 1)
-				cur_state.last_row = cur_row - 1;	//record the previous line of the first ~line
+			if(screen.last_row > cur_row - 1)
+				screen.last_row = cur_row - 1;	//record the previous line of the first ~line
 			printf("~\n");
-			cur_state.line_endpos[cur_row] = cur_col;
+			screen.row_end[cur_row] = cur_col;
 			cur_row++;
 		}
-		if(cur_row == cur_state.win_height )	
+		if(cur_row == screen.win_height )	
 		{
 			if(word == '\n')
 				break;
@@ -247,7 +247,7 @@ void display(int start_line)
 		}
 		index = pos;
 	}
-	if(cur_state.view_mode & LINESHOW )	//if the number of line needs to be shown
+	if(screen.view_mode & LINESHOW )	//if the number of line needs to be shown
 		line_number_list();
 	text_info();
 	CURSOR_SHOW();
@@ -260,8 +260,8 @@ int view()
 	static int flag = 0;
 	static int save_mode = 0;
 	int i;
-	int modified_mode = save_mode ^ cur_state.view_mode;
-	save_mode = cur_state.view_mode;
+	int modified_mode = save_mode ^ screen.view_mode;
+	save_mode = screen.view_mode;
 	if(flag == 0)
 	{
 	/*just for debug
@@ -269,10 +269,10 @@ int view()
 	sleep(5);
 	*/
 		flag = 1;
-		cur_state.cur_row = 1;
-		cur_state.cur_col = 1;
-		cur_state.start_line = 1;
-		cur_state.cur_pos = 1;
+		screen.cur_row = 1;
+		screen.cur_col = 1;
+		file.start_line = 1;
+		screen.cur_pos = 1;
 		file.cur_line = 1;
 		file.cur_index = 1;
 		state_init();
@@ -282,19 +282,19 @@ int view()
 	}
 	else if (modified_mode & LINESHOW)
 	{
-		if(cur_state.view_mode & LINESHOW)
+		if(screen.view_mode & LINESHOW)
 		{
 			prepro();
 			state_init();
-			display(cur_state.start_line);
+			display(file.start_line);
 			CheckCursor();
 		}
 		else
 		{
-			cur_state.cur_col = cur_state.cur_col - cur_state.start_pos + 1;
-			cur_state.start_pos = 1;
+			screen.cur_col = screen.cur_col - screen.start_pos + 1;
+			screen.start_pos = 1;
 			state_init();
-			display(cur_state.start_line);
+			display(file.start_line);
 			CheckCursor();
 		}
 	}
@@ -339,134 +339,134 @@ int view()
 			case 'g':
 					if(inbuffer.buf[inbuffer.size-1] == 'g')
 					{
-						cur_state.start_line = 1;
+						file.start_line = 1;
 						file.cur_line = 1;
 						display(1);
-						cur_state.cur_row = 1;
-						cur_state.cur_col = cur_state.start_pos;
-						CURSOR_MOVE(1,cur_state.start_pos);
+						screen.cur_row = 1;
+						screen.cur_col = screen.start_pos;
+						CURSOR_MOVE(1,screen.start_pos);
 						clearinbuffer();
 						break;
 					}
 					addinbuffer('g');
 					break;
 			case 'G':
-					if(file.total_line > cur_state.win_height - 2)
+					if(file.total_line > screen.win_height - 2)
 					{
-						cur_state.start_line = file.total_line - cur_state.win_height + 2;
-						display(file.total_line - cur_state.win_height + 2);
-						while(cur_state.last_line < file.total_line)
+						file.start_line = file.total_line - screen.win_height + 2;
+						display(file.total_line - screen.win_height + 2);
+						while(screen.last_line < file.total_line)
 						{
-					 		CursorDown(file.total_line-cur_state.last_line);
+					 		CursorDown(file.total_line-screen.last_line);
 						}
 						file.cur_line = file.total_line;
 					}
 					else
 					{
 						display(1);
-						cur_state.start_line = 1;
+						file.start_line = 1;
 					}
-					cur_state.cur_row = cur_state.last_row;
-					cur_state.cur_col = cur_state.start_pos;
-					//CURSOR_MOVE(cur_state.last_row,cur_state.start_pos);
+					screen.cur_row = screen.last_row;
+					screen.cur_col = screen.start_pos;
+					//CURSOR_MOVE(screen.last_row,screen.start_pos);
 			 		clearinbuffer();
 					break;
 			case Ctl('f'):
 					 
-						cur_state.start_line += cur_state.win_height - 2; 
-						if(cur_state.start_line > file.total_line - cur_state.win_height + 2) 
-							 cur_state.start_line = file.total_line - cur_state.win_height + 2;
-						display(cur_state.start_line);
-						CURSOR_MOVE(1,cur_state.cur_pos);
-						cur_state.cur_row = 1;
-						cur_state.cur_col = cur_state.cur_pos;
+						file.start_line += screen.win_height - 2; 
+						if(file.start_line > file.total_line - screen.win_height + 2) 
+							 file.start_line = file.total_line - screen.win_height + 2;
+						display(file.start_line);
+						CURSOR_MOVE(1,screen.cur_pos);
+						screen.cur_row = 1;
+						screen.cur_col = screen.cur_pos;
 						CheckCursor();
 					 	
 					 /*	//simple implement,but not effecient
-						CURSOR_MOVE(cur_state.win_height - 1,1);
-						cur_state.cur_row = cur_state.win_height - 1;
-						CursorDown(cur_state.win_height - 2);
+						CURSOR_MOVE(screen.win_height - 1,1);
+						screen.cur_row = screen.win_height - 1;
+						CursorDown(screen.win_height - 2);
 						CURSOR_MOVE(1,1);
-						cur_state.cur_row = 1;
+						screen.cur_row = 1;
 						*/
 			 		 clearinbuffer();
 						break;
 
 			case Ctl('b'):
-						cur_state.start_line -= cur_state.win_height - 2;
-						if(cur_state.start_line <= 0)
-							cur_state.start_line = 1;
-						display(cur_state.start_line);
-						CURSOR_MOVE(cur_state.win_height-1,cur_state.cur_pos);
-						cur_state.cur_row = cur_state.win_height - 1;
-						cur_state.cur_col = cur_state.cur_pos;
+						file.start_line -= screen.win_height - 2;
+						if(file.start_line <= 0)
+							file.start_line = 1;
+						display(file.start_line);
+						CURSOR_MOVE(screen.win_height-1,screen.cur_pos);
+						screen.cur_row = screen.win_height - 1;
+						screen.cur_col = screen.cur_pos;
 						CheckCursor();
 			 		 clearinbuffer();
 						break;
 			
 			case Ctl('d'):
-						cur_state.start_line += cur_state.win_height/2 - 1; 
-						if(cur_state.start_line > file.total_line - cur_state.win_height + 2) 
-							 cur_state.start_line = file.total_line - cur_state.win_height + 2;
-						display(cur_state.start_line);
-						CURSOR_MOVE(1,cur_state.cur_pos);
-						cur_state.cur_row = 1;
-						cur_state.cur_col = cur_state.cur_pos;
+						file.start_line += screen.win_height/2 - 1; 
+						if(file.start_line > file.total_line - screen.win_height + 2) 
+							 file.start_line = file.total_line - screen.win_height + 2;
+						display(file.start_line);
+						CURSOR_MOVE(1,screen.cur_pos);
+						screen.cur_row = 1;
+						screen.cur_col = screen.cur_pos;
 						CheckCursor();
 			 		 clearinbuffer();
 						break;
 
 			case Ctl('u'):
-						cur_state.start_line -= cur_state.win_height/2 - 1;
-						if(cur_state.start_line <= 0)
-							cur_state.start_line = 1;
-						display(cur_state.start_line);
-						CURSOR_MOVE(cur_state.win_height-1,cur_state.cur_pos);
-						cur_state.cur_row = cur_state.win_height - 1;
-						cur_state.cur_col = cur_state.cur_pos;
+						file.start_line -= screen.win_height/2 - 1;
+						if(file.start_line <= 0)
+							file.start_line = 1;
+						display(file.start_line);
+						CURSOR_MOVE(screen.win_height-1,screen.cur_pos);
+						screen.cur_row = screen.win_height - 1;
+						screen.cur_col = screen.cur_pos;
 						CheckCursor();
 			 		 clearinbuffer();
 						break;
 			case 'H':
-						CURSOR_MOVE(1,cur_state.start_pos);
-						cur_state.cur_row = 1;
-						cur_state.cur_col = cur_state.start_pos;
+						CURSOR_MOVE(1,screen.start_pos);
+						screen.cur_row = 1;
+						screen.cur_col = screen.start_pos;
 			 		 clearinbuffer();
 						break;
 			case 'M':
-						CURSOR_MOVE(cur_state.win_height/2,cur_state.start_pos);
-						cur_state.cur_row = cur_state.win_height/2;
-						cur_state.cur_col = cur_state.start_pos;
+						CURSOR_MOVE(screen.win_height/2,screen.start_pos);
+						screen.cur_row = screen.win_height/2;
+						screen.cur_col = screen.start_pos;
 						CheckCursor();
 			 		 clearinbuffer();
 						break;
 			case 'L':
-						CURSOR_MOVE(cur_state.win_height - 1,cur_state.start_pos);
-						cur_state.cur_row = cur_state.win_height - 1;
-						cur_state.cur_col = cur_state.start_pos;
+						CURSOR_MOVE(screen.win_height - 1,screen.start_pos);
+						screen.cur_row = screen.win_height - 1;
+						screen.cur_col = screen.start_pos;
 						CheckCursor();
 			 		 clearinbuffer();
 						break;
 
 			/*for debug*/
 			case 's':CursorLocate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
-			case 'w':printf("%d %d ",cur_state.win_height,cur_state.win_width);fflush(stdout);break;
+			case 'w':printf("%d %d ",screen.win_height,screen.win_width);fflush(stdout);break;
 			case 't':printf("%d ",file.total_line);fflush(stdout);break;
-			case 'd':printf("%d",cur_state.start_pos);break;
-			case 'e':printf("%d",cur_state.line_endpos[cur_state.cur_row]);break;
+			case 'd':printf("%d",screen.start_pos);break;
+			case 'e':printf("%d",screen.row_end[screen.cur_row]);break;
 			case 'c':
 					 printf("%d %d",file.cur_line,file.cur_index);
 					 printf(" %d %d",file.line[file.cur_line].line_size,file.line[file.cur_line].line_row);
 					 fflush(stdout);
 					 /*
-					 for(i = 1 ; i < cur_state.line_endpos[cur_state.cur_row - 1]; i++)
-						 if(cur_state.character[cur_state.cur_row-1][i] == '\t')
+					 for(i = 1 ; i < screen.row_end[screen.cur_row - 1]; i++)
+						 if(cur_state.character[screen.cur_row-1][i] == '\t')
 							 putchar('t');
 						 else 
-						 if(cur_state.character[cur_state.cur_row-1][i] == '\n')
+						 if(cur_state.character[screen.cur_row-1][i] == '\n')
 							 putchar('n');
 						 else 
-						 putchar(cur_state.character[cur_state.cur_row-1][i]);
+						 putchar(cur_state.character[screen.cur_row-1][i]);
 						 */
 					 break;
 			/*for debug*/
