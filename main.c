@@ -7,6 +7,7 @@
 FILE *FP,*OFP;
 struct state cur_state;
 struct buffer inbuffer;
+struct file file;
 void addinbuffer(char c)
 {
 	int k;
@@ -39,13 +40,13 @@ void init()
 void text_info()
 {
 	int cur_line;
-	cur_line = cur_state.cur_line;
+	cur_line = file.cur_line;
 	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-20);
 	printf("                    ");
 	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-20);
-	printf("line:%d %d",cur_line,cur_state.cur_index);
+	printf("line:%d %d",cur_line,file.cur_index);
 	CURSOR_MOVE(cur_state.win_height,cur_state.win_width-5);
-	printf("%d%%",cur_line * 100 / cur_state.total_line);
+	printf("%d%%",cur_line * 100 / file.total_line);
 
 	CURSOR_MOVE(cur_state.cur_row,cur_state.cur_col);
 }
@@ -129,9 +130,9 @@ void btof(FILE *fp)
 	line = 1;
 	index = 1;
 	fseek(fp,0,SEEK_SET);
-	while(line <= cur_state.total_line)	
+	while(line <= file.total_line)	
 	{
-		word = cur_state.line[line].character[index]; 
+		word = file.line[line].character[index]; 
 		if(word != '\n')
 			index++;
 		else
@@ -169,6 +170,7 @@ int main(int argc,char *argv[])
 		FP = fopen(path,"w+");
 		fcopy(FP,OFP);
 	}
+	file.open_mode = mode;
 	
 	clear_screen();	
 	process();

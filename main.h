@@ -39,6 +39,26 @@ struct file_line{
 	int line_size;	//size / 256
 	char *character;	
 };
+struct file{
+	int open_mode;
+	int total_line;
+	int cur_line;
+	int cur_index;
+	struct file_line *line;
+};
+struct screen{
+	int win_height;
+	int win_width;
+	int view_mode;
+	int cur_row;
+	int cur_col;
+	int start_pos;
+	int cur_pos;
+	int last_row;
+	int last_line;
+	int row_end[MAX_SCREEN_HEIGHT];
+	int map[MAX_SCREEN_HEIGHT][MAX_SCREEN_WIDTH];
+};
 struct state{
 	int total_line;
 	int start_line;
@@ -63,6 +83,7 @@ struct buffer{
 };
 extern FILE *FP,*OFP;
 extern struct state cur_state;
+extern struct file file;
 extern struct buffer inbuffer;
 
 extern void addinbuffer(char c);

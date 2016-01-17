@@ -24,7 +24,7 @@ void CheckCursor()
 		CURSOR_MOVE(cur_state.cur_row,cur_state.start_pos);
 		cur_state.cur_col = cur_state.start_pos;
 	}
-	if(cur_state.line[cur_state.cur_line].character[cur_state.cur_index] == '\t')
+	if(file.line[file.cur_line].character[file.cur_index] == '\t')
 	{
 		cur_state.cur_col = (cur_state.cur_col + TABLEN - 1) / TABLEN * TABLEN;	
 		CURSOR_MOVE(cur_state.cur_row,cur_state.cur_col);
@@ -53,7 +53,7 @@ void CursorUp(int line)
 			}
 		}
 	}
-	cur_state.cur_line--;
+	file.cur_line--;
 	CheckCursor();
 }
 void CursorDown(int line)
@@ -69,9 +69,9 @@ void CursorDown(int line)
 		}
 		else
 		{
-			if(cur_state.start_line  <= cur_state.total_line)
+			if(cur_state.start_line  <= file.total_line)
 			{
-				back_row = cur_state.line[cur_state.start_line].line_row;	//start_line.row > 1 ,so move back the cursor
+				back_row = file.line[cur_state.start_line].line_row;	//start_line.row > 1 ,so move back the cursor
 				cur_state.start_line++;
 				display(cur_state.start_line);
 				cur_state.cur_row = cur_state.win_height-back_row;
@@ -80,7 +80,7 @@ void CursorDown(int line)
 			}
 		}
 	}
-	cur_state.cur_line++;
+	file.cur_line++;
 	CheckCursor();
 }
 void CursorLeft(int character)
@@ -89,7 +89,7 @@ void CursorLeft(int character)
 	while(cur_state.cur_col > cur_state.start_pos && character > 0)
 	{
 		
-		if(cur_state.line[cur_state.cur_line].character[cur_state.cur_index] != '\t')
+		if(file.line[file.cur_line].character[file.cur_index] != '\t')
 		{
 			cur_state.cur_col--;
 			CURSOR_LEFT();
@@ -105,8 +105,8 @@ void CursorLeft(int character)
 			character--;
 		}
 
-		if(cur_state.cur_index > 1)
-			cur_state.cur_index --;
+		if(file.cur_index > 1)
+			file.cur_index --;
 	}
 	cur_state.cur_pos = cur_state.cur_col;	//used for cursor up-moving and down-moving
 	CheckCursor();
@@ -119,8 +119,8 @@ void CursorRight(int character)
 		CURSOR_RIGHT();
 		character--;
 	}
-	if(cur_state.cur_index < cur_state.line[cur_state.cur_line].line_end)
-		cur_state.cur_index ++;
+	if(file.cur_index < file.line[file.cur_line].line_end)
+		file.cur_index ++;
 	cur_state.cur_pos = cur_state.cur_col;
 	CheckCursor();
 }
