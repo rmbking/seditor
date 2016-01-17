@@ -43,6 +43,7 @@ struct file{
 	int open_mode;
 	int start_line;
 	int total_line;
+	int last_line;
 	int cur_line;
 	int cur_index;
 	struct file_line *line;
@@ -56,8 +57,9 @@ struct screen{
 	int start_pos;
 	int cur_pos;
 	int last_row;
-	int last_line;
 	int row_end[MAX_SCREEN_HEIGHT];
+	int row_rank[MAX_SCREEN_HEIGHT];
+	int line[MAX_SCREEN_HEIGHT];
 	int map[MAX_SCREEN_HEIGHT][MAX_SCREEN_WIDTH];
 };
 /*

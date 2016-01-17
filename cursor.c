@@ -32,6 +32,10 @@ void CheckCursor()
 
 }
 static int row_of_line = 1;
+void CursorMove()
+{
+	CURSOR_MOVE(screen.cur_row,screen.cur_col);
+}
 void CursorUp(int line)
 {
 	while(line--)
@@ -97,11 +101,15 @@ void CursorLeft(int character)
 		}
 		else
 		{
-			if(screen.cur_col > TABLEN)
-				screen.cur_col -= TABLEN;
-			k = TABLEN;
-			while(k--)
-				CURSOR_LEFT();
+			for(k = 0; k < TABLEN-1; k++)
+				if(screen.map[screen.cur_row][screen.cur_col-k] == screen.map[screen.cur_row][screen.cur_col-k-1])
+				{
+					CURSOR_LEFT();
+				}
+				else
+					break;
+			CURSOR_LEFT();
+			screen.cur_col -= k+1;
 			character--;
 		}
 
@@ -113,20 +121,34 @@ void CursorLeft(int character)
 }
 void CursorRight(int character)
 {
+	/*may be used as the extension of direction keys
 	while(screen.cur_col < screen.row_end[screen.cur_row] && character > 0)
 	{
 		screen.cur_col++;
 		CURSOR_RIGHT();
 		character--;
 	}
+	*/
+	while(character > 0 && file.cur_index < file.line[file.cur_line].line_end)
+	{
+		if(screen.cur_col < screen.win_width)
+		{
+			screen.cur_col++;
+			CURSOR_RIGHT();
+		}
+		else
+		{
+			screen.cur_col = screen.start_pos;
+			screen.cur_row ++;
+			CursorMove();
+		}
+		character--;
+	}
+
 	if(file.cur_index < file.line[file.cur_line].line_end)
 		file.cur_index ++;
-	screen.cur_pos = screen.cur_col;
+	screen.cur_pos ++;
 	CheckCursor();
-}
-void CursorMove()
-{
-	CURSOR_MOVE(screen.cur_row,screen.cur_col);
 }
 void CursorLocate(int *row,int *col)
 {

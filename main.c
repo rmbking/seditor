@@ -46,7 +46,7 @@ void text_info()
 	CURSOR_MOVE(screen.win_height,screen.win_width-20);
 	printf("                    ");
 	CURSOR_MOVE(screen.win_height,screen.win_width-20);
-	printf("line:%d %d",cur_line,file.cur_index);
+	printf("%d %d,%d %d",cur_line,file.cur_index,screen.cur_row,screen.cur_col);
 	CURSOR_MOVE(screen.win_height,screen.win_width-5);
 	printf("%d%%",cur_line * 100 / file.total_line);
 
