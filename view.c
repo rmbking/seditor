@@ -264,6 +264,7 @@ int view()
 
 	char cmd;
 	int row,col;
+	int rows;
 	static int flag = 0;
 	static int save_mode = 0;
 	int i;
@@ -329,7 +330,11 @@ int view()
 			case 'j':
 					 if(file.cur_line < file.total_line)
 					 {
-					 	CursorDown(file.line[file.cur_line].line_row - screen.row_rank[screen.cur_row] + 1);
+						 if(screen.row_rank[screen.cur_row] >= file.line[file.cur_line+1].line_row)
+							 rows = file.line[file.cur_line].line_row - screen.row_rank[screen.cur_row] + file.line[file.cur_line + 1].line_row;
+						 else
+							 rows = file.line[file.cur_line].line_row;
+					 	CursorDown(rows);
 					 }
 			 		 clearinbuffer();
 					 getpos();
@@ -337,7 +342,11 @@ int view()
 			case 'k':
 					 if(file.cur_line > 1)
 					 {
-					 	CursorUp(file.line[file.cur_line - 1].line_row);
+						if(file.line[file.cur_line - 1].line_row >= screen.row_rank[screen.cur_row])
+							rows = file.line[file.cur_line - 1].line_row;
+						else
+							rows = screen.row_rank[screen.cur_row];
+					 	CursorUp(rows);
 					 }
 			 		 clearinbuffer();
 					 getpos();
