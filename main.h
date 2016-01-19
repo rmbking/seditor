@@ -55,6 +55,8 @@ struct screen{
 	int cur_row;
 	int cur_col;
 	int start_pos;
+	int row_offset;
+	int col_offset;
 	int cur_pos;
 	int last_row;
 	int row_end[MAX_SCREEN_HEIGHT];

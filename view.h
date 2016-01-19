@@ -8,9 +8,6 @@
 #define writeto(buf,word) {buf.character[buf.line_end] = word;}
 extern int view();
 extern void display(int line);
-extern int cur_line;
-extern int cur_pos;
-extern int total_line;
 extern struct winsize win;
 
 #endif

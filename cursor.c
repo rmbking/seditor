@@ -43,8 +43,8 @@ void CursorUp(int line)
 		if(screen.cur_row > 1)	
 		{
 			screen.cur_row--;
-			CURSOR_MOVE(screen.cur_row,screen.cur_pos);
-			screen.cur_col = screen.cur_pos;
+			CURSOR_MOVE(screen.cur_row,screen.col_offset);
+			screen.cur_col = screen.col_offset;
 		}
 		else
 		{
@@ -52,8 +52,8 @@ void CursorUp(int line)
 			{
 				file.start_line--;
 				display(file.start_line);
-				CURSOR_MOVE(1,screen.cur_pos);
-				screen.cur_col = screen.cur_pos;
+				CURSOR_MOVE(1,screen.col_offset);
+				screen.cur_col = screen.col_offset;
 			}
 		}
 	}
@@ -68,8 +68,8 @@ void CursorDown(int line)
 		if(screen.cur_row < screen.win_height - 1)
 		{
 			screen.cur_row++;
-			CURSOR_MOVE(screen.cur_row,screen.cur_pos);
-			screen.cur_col = screen.cur_pos;
+			CURSOR_MOVE(screen.cur_row,screen.col_offset);
+			screen.cur_col = screen.col_offset;
 		}
 		else
 		{
@@ -79,7 +79,7 @@ void CursorDown(int line)
 				file.start_line++;
 				display(file.start_line);
 				screen.cur_row = screen.win_height-back_row;
-				screen.cur_col = screen.cur_pos;
+				screen.cur_col = screen.col_offset;
 				CursorMove();
 			}
 		}
@@ -116,7 +116,7 @@ void CursorLeft(int character)
 		if(file.cur_index > 1)
 			file.cur_index --;
 	}
-	screen.cur_pos = screen.cur_col;	//used for cursor up-moving and down-moving
+	screen.col_offset = screen.cur_col;	//used for cursor up-moving and down-moving
 	CheckCursor();
 }
 void CursorRight(int character)
@@ -147,7 +147,7 @@ void CursorRight(int character)
 
 	if(file.cur_index < file.line[file.cur_line].line_end)
 		file.cur_index ++;
-	screen.cur_pos ++;
+	screen.col_offset ++;
 	CheckCursor();
 }
 void CursorLocate(int *row,int *col)

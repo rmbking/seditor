@@ -280,7 +280,7 @@ int view()
 		screen.cur_row = 1;
 		screen.cur_col = 1;
 		file.start_line = 1;
-		screen.cur_pos = 1;
+		screen.col_offset = 1;
 		file.cur_line = 1;
 		file.cur_index = 1;
 		state_init();
@@ -399,9 +399,9 @@ int view()
 						if(file.start_line > file.total_line - screen.win_height + 2) 
 							 file.start_line = file.total_line - screen.win_height + 2;
 						display(file.start_line);
-						CURSOR_MOVE(1,screen.cur_pos);
+						CURSOR_MOVE(1,screen.col_offset);
 						screen.cur_row = 1;
-						screen.cur_col = screen.cur_pos;
+						screen.cur_col = screen.col_offset;
 						CheckCursor();
 					 	
 					 /*	//simple implement,but not effecient
@@ -419,9 +419,9 @@ int view()
 						if(file.start_line <= 0)
 							file.start_line = 1;
 						display(file.start_line);
-						CURSOR_MOVE(screen.win_height-1,screen.cur_pos);
+						CURSOR_MOVE(screen.win_height-1,screen.col_offset);
 						screen.cur_row = screen.win_height - 1;
-						screen.cur_col = screen.cur_pos;
+						screen.cur_col = screen.col_offset;
 						CheckCursor();
 			 		 clearinbuffer();
 						break;
@@ -431,9 +431,9 @@ int view()
 						if(file.start_line > file.total_line - screen.win_height + 2) 
 							 file.start_line = file.total_line - screen.win_height + 2;
 						display(file.start_line);
-						CURSOR_MOVE(1,screen.cur_pos);
+						CURSOR_MOVE(1,screen.col_offset);
 						screen.cur_row = 1;
-						screen.cur_col = screen.cur_pos;
+						screen.cur_col = screen.col_offset;
 						CheckCursor();
 			 		 clearinbuffer();
 						break;
@@ -443,9 +443,9 @@ int view()
 						if(file.start_line <= 0)
 							file.start_line = 1;
 						display(file.start_line);
-						CURSOR_MOVE(screen.win_height-1,screen.cur_pos);
+						CURSOR_MOVE(screen.win_height-1,screen.col_offset);
 						screen.cur_row = screen.win_height - 1;
-						screen.cur_col = screen.cur_pos;
+						screen.cur_col = screen.col_offset;
 						CheckCursor();
 			 		 clearinbuffer();
 						break;
