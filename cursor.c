@@ -4,6 +4,11 @@
 #include "main.h"
 #include "cursor.h"
 #include "view.h"
+void offset()
+{
+	screen.col_offset = screen.cur_col;	//used for cursor up-moving and down-moving
+	screen.row_offset = file.line[file.cur_line].line_row;
+}
 void CheckCursor()
 {
 
@@ -62,65 +67,82 @@ void CursorUp(int line)
 }
 void CursorDown(int line)
 {
-	int back_row;
-	while(line--)
-	{
-		if(screen.cur_row < screen.win_height - 1)
+	int rows;
+	int lines;
+	 if(file.cur_line < file.total_line)
+	 {
+		 if(screen.row_rank[screen.cur_row] >= file.line[file.cur_line+1].line_row)
+			 lines = file.line[file.cur_line].line_row - screen.row_rank[screen.cur_row] + file.line[file.cur_line + 1].line_row;
+		 else
+			 lines = file.line[file.cur_line].line_row;
+		while(lines--)
 		{
-			screen.cur_row++;
-			CURSOR_MOVE(screen.cur_row,screen.col_offset);
-			screen.cur_col = screen.col_offset;
-		}
-		else
-		{
-			if(file.start_line  <= file.total_line)
+			if(screen.cur_row < screen.win_height - 1)
 			{
-				back_row = file.line[file.start_line].line_row;	//start_line.row > 1 ,so move back the cursor
-				file.start_line++;
-				display(file.start_line);
-				screen.cur_row = screen.win_height-back_row;
+				screen.cur_row++;
+				CURSOR_MOVE(screen.cur_row,screen.col_offset);
 				screen.cur_col = screen.col_offset;
-				CursorMove();
+			}
+			else
+			{
+				if(file.start_line  <= file.total_line)
+				{
+					rows = file.line[file.start_line].line_row;	//start_line.row > 1 ,so move back the cursor
+					file.start_line++;
+					display(file.start_line);
+					screen.cur_row = screen.win_height-rows;
+					screen.cur_col = screen.col_offset;
+					CursorMove();
+				}
 			}
 		}
-	}
-	file.cur_line++;
-	CheckCursor();
+		getpos();
+		CheckCursor();
+	 }
 }
 void CursorLeft(int character)
 {
 	int k;
-	while(screen.cur_col > screen.start_pos && character > 0)
+	while(file.cur_index > 1 && character > 0)
 	{
-		
-		if(file.line[file.cur_line].character[file.cur_index] != '\t')
+		if(screen.cur_col == screen.start_pos || screen.cur_col < (screen.start_pos + TABLEN - 1) &&  file.line[file.cur_line].character[file.cur_index]== '\t')	
 		{
-			screen.cur_col--;
-			CURSOR_LEFT();
-			character--;
+			screen.cur_col = screen.win_width;//D:to be extended if direction keys are used since the first row not the fisrt.	
+			screen.cur_row--;
 		}
 		else
 		{
-			for(k = 0; k < TABLEN-1; k++)
-				if(screen.map[screen.cur_row][screen.cur_col-k] == screen.map[screen.cur_row][screen.cur_col-k-1])
-				{
-					CURSOR_LEFT();
+			if(file.line[file.cur_line].character[file.cur_index] != '\t')
+			{
+				CURSOR_LEFT();
+				screen.cur_col--;
 				}
-				else
-					break;
-			CURSOR_LEFT();
-			screen.cur_col -= k+1;
-			character--;
+			else
+			{
+				for(k = 1; k < TABLEN; k++)
+				{
+					if(screen.map[screen.cur_row][screen.cur_col-k+1] == screen.map[screen.cur_row][screen.cur_col-k])
+						{
+						CURSOR_LEFT();
+					}
+					else
+						break;
+				}
+				screen.cur_col -= k+1;
+			}
 		}
+
+		character--;
 
 		if(file.cur_index > 1)
 			file.cur_index --;
 	}
-	screen.col_offset = screen.cur_col;	//used for cursor up-moving and down-moving
+	offset();
 	CheckCursor();
 }
 void CursorRight(int character)
 {
+	int rows;
 	/*may be used as the extension of direction keys
 	while(screen.cur_col < screen.row_end[screen.cur_row] && character > 0)
 	{
@@ -138,16 +160,28 @@ void CursorRight(int character)
 		}
 		else
 		{
-			screen.cur_col = screen.start_pos;
-			screen.cur_row ++;
-			CursorMove();
+			if(screen.cur_row < screen.win_height - 1)
+			{
+				screen.cur_col = screen.start_pos;
+				screen.cur_row ++;
+				CursorMove();
+			}
+			else
+			{
+				rows = file.line[file.start_line].line_row - 1;
+				file.start_line++;//not checked,in fact it will cause bugs but I don't want to deal now.
+				display(file.start_line);
+				screen.cur_row -= rows;
+				screen.cur_col = screen.start_pos;
+				CursorMove();
+			}
 		}
 		character--;
 	}
 
 	if(file.cur_index < file.line[file.cur_line].line_end)
 		file.cur_index ++;
-	screen.col_offset ++;
+	offset();
 	CheckCursor();
 }
 void CursorLocate(int *row,int *col)
