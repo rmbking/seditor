@@ -247,9 +247,11 @@ void display(int start_line)
 		}
 		if(cur_row == screen.win_height )	
 		{
+		/*preread one line unless getting the '\n' for moving down
 			if(word == '\n')
 				break;
 			else
+		*/
 				end_flag = 1;	//finish reading the last line to get the rows but not write to the screen.
 		}
 		index = pos;
@@ -328,26 +330,12 @@ int view()
 					 getpos();
 					 break;
 			case 'j':
-					 if(file.cur_line < file.total_line)
-					 {
-						 if(screen.row_rank[screen.cur_row] >= file.line[file.cur_line+1].line_row)
-							 rows = file.line[file.cur_line].line_row - screen.row_rank[screen.cur_row] + file.line[file.cur_line + 1].line_row;
-						 else
-							 rows = file.line[file.cur_line].line_row;
-					 	CursorDown(rows);
-					 }
+					 CursorDown(1);
 			 		 clearinbuffer();
 					 getpos();
 					 break;
 			case 'k':
-					 if(file.cur_line > 1)
-					 {
-						if(file.line[file.cur_line - 1].line_row >= screen.row_rank[screen.cur_row])
-							rows = file.line[file.cur_line - 1].line_row;
-						else
-							rows = screen.row_rank[screen.cur_row];
-					 	CursorUp(rows);
-					 }
+					 	CursorUp(1);
 			 		 clearinbuffer();
 					 getpos();
 					 break;
@@ -472,13 +460,13 @@ int view()
 
 			/*for debug*/
 			case 's':CursorLocate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
-			case 'w':printf("%d %d ",screen.win_height,screen.win_width);fflush(stdout);break;
+			case 'w':printf("%d %d ",screen.row_offset,screen.col_offset);fflush(stdout);break;
 			case 't':printf("%d ",file.total_line);fflush(stdout);break;
 			case 'd':printf("%d",screen.start_pos);break;
 			case 'e':printf("%d",screen.row_end[screen.cur_row]);break;
 			case 'c':
 					 printf("%d %d",file.cur_line,file.cur_index);
-					 printf(" %d %d",file.line[file.cur_line].line_size,file.line[file.cur_line].line_row);
+					 printf(" %d %d",screen.row_rank[screen.cur_row],file.line[file.cur_line].line_row);
 					 fflush(stdout);
 					 break;
 			case 'p':

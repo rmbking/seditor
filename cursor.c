@@ -7,81 +7,111 @@
 void offset()
 {
 	screen.col_offset = screen.cur_col;	//used for cursor up-moving and down-moving
-	screen.row_offset = file.line[file.cur_line].line_row;
+	screen.row_offset = screen.row_rank[screen.cur_row];
+}
+void CursorMove()
+{
+	CURSOR_MOVE(screen.cur_row,screen.cur_col);
 }
 void CheckCursor()
 {
 
 	if(screen.cur_row > screen.last_row)
 	{
-		CURSOR_MOVE(screen.last_row,screen.start_pos);
 		screen.cur_row = screen.last_row;
 	}
 
 	if(screen.row_end[screen.cur_row] < screen.cur_col)	//not move the cursor to the position where no character exits.
 	{
-		CURSOR_MOVE(screen.cur_row,screen.row_end[screen.cur_row]);
 		screen.cur_col = screen.row_end[screen.cur_row];
 	}
 
-	if(screen.view_mode & LINESHOW && screen.cur_col < screen.start_pos)
+	if(screen.cur_col < screen.start_pos)
 	{
-		CURSOR_MOVE(screen.cur_row,screen.start_pos);
 		screen.cur_col = screen.start_pos;
 	}
 	if(file.line[file.cur_line].character[file.cur_index] == '\t')
 	{
 		screen.cur_col = (screen.cur_col + TABLEN - 1) / TABLEN * TABLEN;	
-		CURSOR_MOVE(screen.cur_row,screen.cur_col);
 	}
 
-}
-static int row_of_line = 1;
-void CursorMove()
-{
-	CURSOR_MOVE(screen.cur_row,screen.cur_col);
+	CursorMove();
+
 }
 void CursorUp(int line)
 {
-	while(line--)
+	int rows;
+	if(file.cur_line > 1)
 	{
-		if(screen.cur_row > 1)	
+		if(file.cur_line > file.start_line)
 		{
-			screen.cur_row--;
-			CURSOR_MOVE(screen.cur_row,screen.col_offset);
-			screen.cur_col = screen.col_offset;
-		}
-		else
-		{
-			if(file.start_line > 1)
+			if(file.line[file.cur_line - 1].line_row < screen.row_offset)
 			{
-				file.start_line--;
-				display(file.start_line);
-				CURSOR_MOVE(1,screen.col_offset);
+				rows = screen.row_rank[screen.cur_row ];
+				screen.cur_col = screen.win_width;
+			}
+			else
+			{
+				rows = screen.row_rank[screen.cur_row] + file.line[file.cur_line-1].line_row - screen.row_offset;
 				screen.cur_col = screen.col_offset;
 			}
+			while(rows--)
+			{
+				if(screen.cur_row > 1)	
+				{
+					screen.cur_row--;
+				}
+				else
+				{
+					if(file.start_line > 1)
+					{
+						file.start_line--;
+						display(file.start_line);
+					}
+				}
+			}
+		}	//not preread the former line,may cause bug.
+		else
+		{
+			file.start_line--;
+			display(file.start_line);
+			if(file.line[file.start_line].line_row < screen.row_offset)
+			{
+				screen.cur_row = file.line[file.start_line].line_row;
+				screen.cur_col = screen.win_width;
+			}	
+			else
+			{
+				screen.cur_row = screen.row_offset;
+				screen.cur_col = screen.col_offset;	
+			}
 		}
+		CursorMove();
+		getpos();
+		CheckCursor();
 	}
-	file.cur_line--;
-	CheckCursor();
 }
 void CursorDown(int line)
 {
 	int rows;
 	int lines;
-	 if(file.cur_line < file.total_line)
-	 {
-		 if(screen.row_rank[screen.cur_row] >= file.line[file.cur_line+1].line_row)
-			 lines = file.line[file.cur_line].line_row - screen.row_rank[screen.cur_row] + file.line[file.cur_line + 1].line_row;
-		 else
-			 lines = file.line[file.cur_line].line_row;
+	if(file.cur_line < file.total_line)
+	{
+		if(screen.row_offset > file.line[file.cur_line+1].line_row)
+		{
+			screen.cur_col = screen.win_width;
+			lines = file.line[file.cur_line].line_row - screen.row_rank[screen.cur_row] + file.line[file.cur_line + 1].line_row;
+		}
+		else
+		{
+			screen.cur_col = screen.col_offset;
+			lines = file.line[file.cur_line].line_row - screen.row_rank[screen.cur_row] + screen.row_offset;
+		}
 		while(lines--)
 		{
 			if(screen.cur_row < screen.win_height - 1)
 			{
 				screen.cur_row++;
-				CURSOR_MOVE(screen.cur_row,screen.col_offset);
-				screen.cur_col = screen.col_offset;
 			}
 			else
 			{
@@ -91,11 +121,11 @@ void CursorDown(int line)
 					file.start_line++;
 					display(file.start_line);
 					screen.cur_row = screen.win_height-rows;
-					screen.cur_col = screen.col_offset;
-					CursorMove();
 				}
 			}
 		}
+		CursorMove();
+
 		getpos();
 		CheckCursor();
 	 }
@@ -122,13 +152,13 @@ void CursorLeft(int character)
 				for(k = 1; k < TABLEN; k++)
 				{
 					if(screen.map[screen.cur_row][screen.cur_col-k+1] == screen.map[screen.cur_row][screen.cur_col-k])
-						{
+					{
 						CURSOR_LEFT();
 					}
 					else
 						break;
 				}
-				screen.cur_col -= k+1;
+				screen.cur_col -= k;
 			}
 		}
 

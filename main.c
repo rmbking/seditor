@@ -36,6 +36,8 @@ void init()
 	memset(&file,0,sizeof(file));	
 	memset(&screen,0,sizeof(screen));	
 	file.start_line = 1;
+	screen.row_offset = 1;
+	screen.col_offset = 1;
 	screen.cur_pos = 1;
 	screen.start_pos = 1;
 }
