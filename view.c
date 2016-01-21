@@ -60,7 +60,7 @@ void next(char c,int index,int *row,int *col,int *row_of_line)
 	else 
 		change_line = 1;	
 }
-void line_number_list()
+void line_number_list(int flag)
 {
 	char format[100];
 	int line_no = file.start_line;
@@ -69,10 +69,12 @@ void line_number_list()
 	while(cur_row <= screen.win_height-1 && line_no <= file.total_line)
 	{
 		CURSOR_MOVE(cur_row,1);
-		printf(format,line_no);
+		if(flag)
+			printf(format,line_no);
 		cur_row += file.line[line_no].line_row;
 		line_no++;
 	}
+	file.last_line = line_no-1;
 	
 }
 void state_init()
@@ -227,8 +229,10 @@ void display(int start_line)
 			{
 				file.line[line - 1].line_row = row_of_line;
 				row_of_line = 1;
-				if(end_flag)
+				if(end_flag == 1)
 					break;
+				else if(end_flag == 2)
+					end_flag--;
 			}
 			else if(word != '\t' && !end_flag)
 				putchar(word);
@@ -254,22 +258,28 @@ void display(int start_line)
 				break;
 			else
 		*/
-			end_flag = 1;	//finish reading the last line to get the rows but not write to the screen.
+			if(word == '\n')
+				end_flag = 1;	//preread one line afterwards.
+			else
+				end_flag = 2;	//finishing this line and then preread one line.
 		}
+		
 		index = pos;
 	}
-	file.last_line = line-1;
 	if(screen.view_mode & LINESHOW )	//if the number of line needs to be shown
-		line_number_list();
+		line_number_list(1);
+	else
+		line_number_list(0);
 	text_info();
 	CURSOR_SHOW();
+	getpos();
 }
 int view()
 {
 
 	char cmd;
 	int row,col;
-	int rows;
+	int tmp;
 	static int flag = 0;
 	static int save_mode = 0;
 	int i;
@@ -367,9 +377,10 @@ int view()
 					{
 						file.start_line = file.total_line - screen.win_height + 2;
 						display(file.total_line - screen.win_height + 2);
-						while(file.last_line < file.total_line)
+						while(file.last_line < file.total_line)	//reach the last line.
 						{
-					 		CursorDown(file.total_line-file.last_line);
+							file.start_line++;
+							display(file.start_line);
 						}
 						file.cur_line = file.total_line;
 					}
@@ -382,39 +393,45 @@ int view()
 					screen.cur_col = screen.start_pos;
 					//CURSOR_MOVE(screen.last_row,screen.start_pos);
 			 		clearinbuffer();
-					 getpos();
+					getpos();
 					break;
 			case Ctl('f'):
-					 
-						file.start_line += screen.win_height - 2; 
-						if(file.start_line > file.total_line - screen.win_height + 2) 
-							 file.start_line = file.total_line - screen.win_height + 2;
+						file.start_line = file.last_line; 
 						display(file.start_line);
-						CURSOR_MOVE(1,screen.col_offset);
 						screen.cur_row = 1;
-						screen.cur_col = screen.col_offset;
+						screen.cur_col = screen.start_pos;
+						CursorMove();
 						CheckCursor();
+						getpos();
 					 	
-					 /*	//simple implement,but not effecient
-						CURSOR_MOVE(screen.win_height - 1,1);
-						screen.cur_row = screen.win_height - 1;
-						CursorDown(screen.win_height - 2);
-						CURSOR_MOVE(1,1);
-						screen.cur_row = 1;
-						*/
-			 		 clearinbuffer();
+			 		 	clearinbuffer();
 						break;
 
 			case Ctl('b'):
-						file.start_line -= screen.win_height - 2;
+						tmp = file.start_line;
+						if(tmp == 1)
+						{
+							screen.cur_row = 1;
+							CursorMove();
+							CheckCursor();
+							getpos();
+							break;
+						}
+						file.start_line -= screen.win_height - 1;
 						if(file.start_line <= 0)
 							file.start_line = 1;
 						display(file.start_line);
-						CURSOR_MOVE(screen.win_height-1,screen.col_offset);
+						while(file.last_line < tmp)
+						{
+							file.start_line++;
+							display(file.start_line);
+						}
 						screen.cur_row = screen.win_height - 1;
-						screen.cur_col = screen.col_offset;
+						screen.cur_col = screen.start_pos;
+						CursorMove();
 						CheckCursor();
-			 		 clearinbuffer();
+						getpos();
+			 			clearinbuffer();
 						break;
 			
 			case Ctl('d'):
