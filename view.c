@@ -213,19 +213,18 @@ void display(int start_line)
 	cur_row = 1;
 	cur_col = screen.start_pos;
 	screen.last_row = screen.win_height - 1;
-	file.last_line = file.start_line - 1;
 	index = pos;
 
 	CURSOR_MOVE(1,screen.start_pos);
 	while(1)
 	{
-		if((word = getc_from_buf()) != EOF) 
+		word = getc_from_buf();
+		if(word != EOF) 
 		{
 			next(word,index,&cur_row,&cur_col,&row_of_line);
 
 			if(word == '\n')
 			{
-				file.last_line++;
 				file.line[line - 1].line_row = row_of_line;
 				row_of_line = 1;
 				if(end_flag)
@@ -241,10 +240,13 @@ void display(int start_line)
 		{
 			if(screen.last_row > cur_row - 1)
 				screen.last_row = cur_row - 1;	//record the previous line of the first ~line
+			CURSOR_MOVE(cur_row,1);
 			printf("~\n");
 			screen.row_end[cur_row] = cur_col;
 			cur_row++;
 		}
+		else
+			break;
 		if(cur_row == screen.win_height )	
 		{
 		/*preread one line unless getting the '\n' for moving down
@@ -252,10 +254,11 @@ void display(int start_line)
 				break;
 			else
 		*/
-				end_flag = 1;	//finish reading the last line to get the rows but not write to the screen.
+			end_flag = 1;	//finish reading the last line to get the rows but not write to the screen.
 		}
 		index = pos;
 	}
+	file.last_line = line-1;
 	if(screen.view_mode & LINESHOW )	//if the number of line needs to be shown
 		line_number_list();
 	text_info();
@@ -441,21 +444,21 @@ int view()
 						CURSOR_MOVE(1,screen.start_pos);
 						screen.cur_row = 1;
 						screen.cur_col = screen.start_pos;
-			 		 clearinbuffer();
+						clearinbuffer();
 						break;
 			case 'M':
 						CURSOR_MOVE(screen.win_height/2,screen.start_pos);
 						screen.cur_row = screen.win_height/2;
 						screen.cur_col = screen.start_pos;
 						CheckCursor();
-			 		 clearinbuffer();
+						clearinbuffer();
 						break;
 			case 'L':
 						CURSOR_MOVE(screen.win_height - 1,screen.start_pos);
 						screen.cur_row = screen.win_height - 1;
 						screen.cur_col = screen.start_pos;
 						CheckCursor();
-			 		 clearinbuffer();
+						clearinbuffer();
 						break;
 
 			/*for debug*/
@@ -470,7 +473,7 @@ int view()
 					 fflush(stdout);
 					 break;
 			case 'p':
-					 printf("%d %d",screen.cur_row,screen.cur_col);fflush(stdout);break;
+					 printf("%d ",file.last_line);fflush(stdout);break;
 			case 'u':
 					 for(i = 1 ; i <= screen.row_end[screen.cur_row - 1]; i++)
 						 if(file.line[screen.line[screen.cur_row-1]].character[screen.map[screen.cur_row-1][i]] == '\t')

@@ -56,20 +56,8 @@ void CursorUp(int line)
 				screen.cur_col = screen.col_offset;
 			}
 			while(rows--)
-			{
-				if(screen.cur_row > 1)	
-				{
-					screen.cur_row--;
-				}
-				else
-				{
-					if(file.start_line > 1)
-					{
-						file.start_line--;
-						display(file.start_line);
-					}
-				}
-			}
+
+				screen.cur_row--;
 		}	//not preread the former line,may cause bug.
 		else
 		{
