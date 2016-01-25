@@ -32,6 +32,11 @@ void input(char *cmd)
 	pos = cmd;
 	while(tmp != '\n' && (pos - cmd) < screen.win_width - 25 )
 	{
+		if(tmp == '\033')
+		{
+			cmd[0] = '\033';
+			break;
+		}
 		if(tmp == 127)	//backspace
 		{
 			*(--pos) = '\0';
@@ -105,6 +110,8 @@ int control()
 					control_info_print("Unknown command:%s",cmd);
 					return VIEW_MODE;
 			}
+		case '\033':
+			return VIEW_MODE;
 		default:
 			control_info_print("Unknown command:%s",cmd);
 			return VIEW_MODE;
