@@ -15,6 +15,7 @@ void CursorMove()
 }
 void CheckCursor()
 {
+	getpos();
 
 	if(screen.cur_row > screen.last_row)
 	{

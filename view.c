@@ -412,6 +412,7 @@ int view()
 						if(tmp == 1)
 						{
 							screen.cur_row = 1;
+							screen.cur_col = screen.start_pos;
 							CursorMove();
 							CheckCursor();
 							getpos();
@@ -435,6 +436,27 @@ int view()
 						break;
 			
 			case Ctl('d'):
+						tmp = screen.win_height/2 - 1;
+						if(screen.last_row < tmp)
+						{
+							file.start_line = file.total_line;
+							display(file.start_line);
+							screen.cur_row = 1;
+							screen.cur_col = screen.start_pos;
+							CursorMove();
+							CheckCursor();
+							getpos();
+							break;
+						}
+						tmp = screen.line[tmp];
+						file.start_line = tmp;
+						display(file.start_line);
+						screen.cur_row = 1;
+						screen.cur_col = screen.start_pos;
+						CursorMove();
+						CheckCursor();
+						getpos();
+						/*
 						file.start_line += screen.win_height/2 - 1; 
 						if(file.start_line > file.total_line - screen.win_height + 2) 
 							 file.start_line = file.total_line - screen.win_height + 2;
@@ -443,19 +465,51 @@ int view()
 						screen.cur_row = 1;
 						screen.cur_col = screen.col_offset;
 						CheckCursor();
-			 		 clearinbuffer();
+			 			clearinbuffer();
+						*/
 						break;
 
 			case Ctl('u'):
+						tmp = screen.win_height/2 - 1;
+						file.start_line -= tmp;
+						if(file.start_line <= 1)
+						{
+							file.start_line = 1;
+							display(file.start_line);
+							screen.cur_row = 1;
+							screen.cur_col = screen.start_pos;
+							CursorMove();
+							CheckCursor();
+							getpos();
+							break;
+						}
+						if(tmp > screen.last_row)
+							tmp = screen.last_row;
+						tmp = screen.line[tmp];
+						display(file.start_line);
+						while(file.last_line < tmp)
+						{
+							file.start_line++;
+							display(file.start_line);
+						}
+						screen.cur_row = screen.last_row;
+						screen.cur_col = screen.start_pos;
+						CursorMove();
+						CheckCursor();
+						getpos();
+						break;
+						/*
 						file.start_line -= screen.win_height/2 - 1;
 						if(file.start_line <= 0)
 							file.start_line = 1;
 						display(file.start_line);
-						CURSOR_MOVE(screen.win_height-1,screen.col_offset);
 						screen.cur_row = screen.win_height - 1;
 						screen.cur_col = screen.col_offset;
+						CursorMove();
 						CheckCursor();
-			 		 clearinbuffer();
+						getpos();
+			 		 	clearinbuffer();
+						*/
 						break;
 			case 'H':
 						CURSOR_MOVE(1,screen.start_pos);
