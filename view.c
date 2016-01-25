@@ -512,24 +512,55 @@ int view()
 						*/
 						break;
 			case 'H':
-						CURSOR_MOVE(1,screen.start_pos);
 						screen.cur_row = 1;
 						screen.cur_col = screen.start_pos;
+						CursorMove();
+						CheckCursor();
+						getpos();
 						clearinbuffer();
 						break;
 			case 'M':
-						CURSOR_MOVE(screen.win_height/2,screen.start_pos);
 						screen.cur_row = screen.win_height/2;
 						screen.cur_col = screen.start_pos;
+						CursorMove();
 						CheckCursor();
+						getpos();
 						clearinbuffer();
 						break;
 			case 'L':
-						CURSOR_MOVE(screen.win_height - 1,screen.start_pos);
 						screen.cur_row = screen.win_height - 1;
 						screen.cur_col = screen.start_pos;
+						CursorMove();
 						CheckCursor();
+						getpos();
 						clearinbuffer();
+						break;
+			case '0':
+						tmp = screen.cur_row;
+						tmp = screen.row_rank[tmp] - 1;
+						screen.cur_row -= tmp;	
+						screen.cur_col = screen.start_pos;
+						CursorMove();
+						CheckCursor();
+						getpos();
+						break;
+			case '$':
+						tmp = screen.cur_row;
+						tmp = screen.line[tmp];
+						tmp = file.line[tmp].line_row - screen.row_rank[screen.cur_row];
+						screen.cur_row += tmp;
+						if(screen.cur_row < screen.win_height)
+						{
+							screen.cur_col = screen.win_width;
+							CursorMove();
+							CheckCursor();
+							getpos;
+							break;
+						}
+						screen.cur_row -= tmp;
+						CursorDown(screen.cur_row + tmp - screen.win_height - 1);
+						CheckCursor();
+						getpos();
 						break;
 
 			/*for debug*/
