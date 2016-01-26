@@ -270,9 +270,9 @@ void display(int start_line)
 		line_number_list(1);
 	else
 		line_number_list(0);
-	text_info();
 	CURSOR_SHOW();
 	getpos();
+	text_info();
 }
 int view()
 {
@@ -554,7 +554,7 @@ int view()
 							screen.cur_col = screen.win_width;
 							CursorMove();
 							CheckCursor();
-							getpos;
+							getpos();
 							break;
 						}
 						screen.cur_row -= tmp;

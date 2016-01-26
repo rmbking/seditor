@@ -179,13 +179,14 @@ void CursorRight(int character)
 		}
 		else
 		{
-			if(screen.cur_row < screen.win_height - 1)
+			//if the last character is right in the last column,the newline won't occupy a new line.
+			if(screen.cur_row < screen.win_height - 1 && file.cur_index < file.line[file.cur_line].line_end - 1)
 			{
 				screen.cur_col = screen.start_pos;
 				screen.cur_row ++;
 				CursorMove();
 			}
-			else
+			else if(screen.cur_row == screen.win_height - 1)
 			{
 				rows = file.line[file.start_line].line_row - 1;
 				file.start_line++;//not checked,in fact it will cause bugs but I don't want to deal now.
