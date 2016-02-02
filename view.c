@@ -277,7 +277,7 @@ void display(int start_line)
 int view()
 {
 
-	char cmd;
+	int cmd;
 	int row,col;
 	int tmp;
 	static int flag = 0;

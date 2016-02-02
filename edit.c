@@ -33,6 +33,7 @@ void delete_word()
 	file.line[line].line_end--;
 	screen.row_end[screen.cur_row]--;
 	CursorLeft(1);
+	display(file.start_line);
 }
 void insert_word(char c)
 {
@@ -89,7 +90,7 @@ void insert_word(char c)
 }
 int edit()
 {
-	char word;
+	int word;
 	prompt(1);
 	while((word = kb_input()) != '\033')	
 	{
@@ -97,14 +98,19 @@ int edit()
 		{
 			case 127:
 				delete_word();
-				display(file.start_line);
-				prompt(1);
+				break;
+			case DEL:
+				if(file.cur_index != file.line[file.cur_line].line_end)
+				{
+					CursorRight(1);
+					delete_word();
+				}
 				break;
 			default:
 				insert_word(word);
-				prompt(1);
 				break;
 		}
+		prompt(1);
 	}
 	prompt(0);
 	return VIEW_MODE;

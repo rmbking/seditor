@@ -40,7 +40,7 @@ int kb_input()
 	int nReturn;
 	if(kb_init() == FAILURE)	
 		return FAILURE;
-	if(nReturn = read(0,&cmd,3))
+	if(nReturn = read(0,&cmd,10))
 	{			
 		if(kb_recover() == FAILURE)
 			return FAILURE;
@@ -59,6 +59,11 @@ int kb_input()
 					default:return cmd[2];
 				}
 			}
+		}
+		else if(nReturn == 4)
+		{
+			if(cmd[0] == '\033' && cmd[1] == '[' && cmd[2] == 51 && cmd[3] == 126)
+				return DEL;
 		}
 	}
 }
