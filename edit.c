@@ -85,6 +85,8 @@ void insert_word(char c)
 			/*display before cursormoving so that the the cursor will move according the modified text*/
 			display(file.start_line);
 			CursorRight(1);
+			if(c == '\t')
+				CursorRight(1);	//the CursorRight just move to next char since it actually CURSORRIGHT and check then.
 		}
 	}
 }
