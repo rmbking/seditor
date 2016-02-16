@@ -100,10 +100,15 @@ void divline()
 	*line = file.line[file.cur_line];
 	line->line_end = file.line[file.cur_line].line_end - file.cur_index + 1;
 	line->character = (char *)malloc(lengthof(file.line[file.cur_line]));
+	if(line->character == NULL)
+	{
+		exit(1);
+	}
 
 	line->character[0] = '+';
 	strncpy(line->character+1,file.line[file.cur_line].character+file.cur_index,line->line_end);
 	file.line[file.cur_line].character[file.cur_index] = '\n';
+	file.total_line++;
 
 	insertelem(file.line,file.total_line,sizeof(struct file_line),file.cur_line+1,line);
 
