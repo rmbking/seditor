@@ -114,7 +114,6 @@ void CursorDown(int line)
 			}
 		}
 		CursorMove();
-
 		getpos();
 		CheckCursor();
 	 }

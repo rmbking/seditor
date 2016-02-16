@@ -17,6 +17,7 @@
 #define NEW 4
 
 #define DEL -256
+#define BACKSPACE 127
 #define EXIT 0
 #define VIEW_MODE 1
 #define EDIT_MODE 2

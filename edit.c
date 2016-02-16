@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "main.h"
 #include "cursor.h"
 #include "kbhit.h"
@@ -90,6 +91,30 @@ void insert_word(char c)
 		}
 	}
 }
+void divline()
+{
+	struct file_line *line;	//TODO,for outrange of line
+	line = (struct file_line *)malloc(sizeof(struct file_line));
+
+	/*the new line inherits the same scale as the origin*/
+	*line = file.line[file.cur_line];
+	line->line_end = file.line[file.cur_line].line_end - file.cur_index + 1;
+	line->character = (char *)malloc(lengthof(file.line[file.cur_line]));
+
+	line->character[0] = '+';
+	strncpy(line->character+1,file.line[file.cur_line].character+file.cur_index,line->line_end);
+	file.line[file.cur_line].character[file.cur_index] = '\n';
+
+	insertelem(file.line,file.total_line,sizeof(struct file_line),file.cur_line+1,line);
+
+	display(file.start_line);	//for Cursor down
+	CursorDown();
+	screen.cur_col = screen.start_pos;
+	CursorMove();
+	CheckCursor();
+	getpos();
+	display(file.start_line);	//for text info
+}
 int edit()
 {
 	int word;
@@ -98,7 +123,7 @@ int edit()
 	{
 		switch(word)
 		{
-			case 127:
+			case BACKSPACE:
 				delete_word();
 				break;
 			case DEL:
@@ -107,6 +132,10 @@ int edit()
 					CursorRight(1);
 					delete_word();
 				}
+				break;
+			case '\n':
+				divline();
+				system("touch success");
 				break;
 			default:
 				insert_word(word);
