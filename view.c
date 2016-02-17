@@ -287,10 +287,6 @@ int view()
 	save_mode = screen.view_mode;
 	if(flag == 0)
 	{
-	/*just for debug
-	printf("%d\n",file.total_line);
-	sleep(5);
-	*/
 		flag = 1;
 		screen.cur_row = 1;
 		screen.cur_col = 1;
@@ -308,7 +304,7 @@ int view()
 		if(screen.view_mode & LINESHOW)
 		{
 			prepro();
-			state_init();
+		//	state_init();
 			display(file.start_line);
 			CheckCursor();
 		}
@@ -316,7 +312,7 @@ int view()
 		{
 			screen.cur_col = screen.cur_col - screen.start_pos + 1;
 			screen.start_pos = 1;
-			state_init();
+		//	state_init();
 			display(file.start_line);
 			CheckCursor();
 		}
