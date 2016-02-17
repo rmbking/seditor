@@ -4,6 +4,10 @@
 #include "kbhit.h"
 #include "control.h"
 #include "view.h"
+
+#define UP 1
+#define DOWN 2
+
 static int sameline = 0;
 void prompt(int cmd)
 {
@@ -28,6 +32,16 @@ void delete_word()
 	int k;
 	int line = file.cur_line;
 	int index = file.cur_index;
+	if(file.line[file.cur_line].line_end == 1)
+	{
+		deletelem(file.line,file.total_line,sizeof(struct file_line),file.cur_line);
+		file.total_line--;	//TODO:only one line or first line
+		CursorUp(1);
+		display(file.start_line);
+		return;
+	}
+	if(index == 1)	//first word,should not be removed
+		return;
 	k = index-1;
 	while(++k <= file.line[line].line_end)
 		file.line[line].character[k-1] = file.line[line].character[k];
@@ -120,6 +134,32 @@ void divline()
 	getpos();
 	display(file.start_line);	//for text info
 }
+void mergline(int dir)
+{
+	struct file_line *line;
+	if(dir == UP)
+	{
+		line = file.line+(file.cur_line - 1);
+		line->character = (char *)realloc(line->character,lengthof(*line)+ lengthof(*(line+1)));
+		strncpy(line->character + line->line_end,(line+1)->character + 1,(line+1)->line_end);
+		line->line_size += (line+1)->line_size;
+		line->line_end += (line+1)->line_end - 1;
+		deletelem(file.line,file.total_line,sizeof(struct file_line),file.cur_line);
+		file.total_line--;
+		display(file.start_line);
+	}
+	if(dir == DOWN)
+	{
+		line = file.line + file.cur_line;
+		line->character = (char *)realloc(line->character,lengthof(*line)+ lengthof(*(line+1)));
+		strncpy(line->character + line->line_end,(line+1)->character + 1,(line+1)->line_end);
+		line->line_size += (line+1)->line_size;
+		line->line_end += (line+1)->line_end - 1;
+		deletelem(file.line,file.total_line,sizeof(struct file_line),file.cur_line);
+		file.total_line--;
+		display(file.start_line);
+	}
+}
 int edit()
 {
 	int word;
@@ -129,14 +169,19 @@ int edit()
 		switch(word)
 		{
 			case BACKSPACE:
-				delete_word();
+				if(file.cur_index != 1)
+					delete_word();
+				else
+					mergline(UP);
 				break;
 			case DEL:
 				if(file.cur_index != file.line[file.cur_line].line_end)
 				{
 					CursorRight(1);
-					delete_word();
+					delete_word(DOWN);
 				}
+				else
+					mergline(DOWN);
 				break;
 			case '\n':
 				divline();
