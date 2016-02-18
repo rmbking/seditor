@@ -1,2 +1,2 @@
-Change the position of cursor when merge lines.
-TAB when edit confused
+replace TAB when editing
+after some backspacing,cursor move right?may be related with initial tab of next line.

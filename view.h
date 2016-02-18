@@ -32,4 +32,5 @@ extern void move_to_page_tail();
 extern void jump_to_first_line();
 extern void jump_to_end_line();
 
+extern void move_to_index(int index);
 #endif

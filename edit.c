@@ -136,16 +136,20 @@ void divline()
 void mergline(int dir)
 {
 	struct file_line *line;
+	int cur_index;
 	if(dir == UP)
 	{
 		line = file.line+(file.cur_line - 1);
 		line->character = (char *)realloc(line->character,lengthof(*line)+ lengthof(*(line+1)));
 		strncpy(line->character + line->line_end,(line+1)->character + 1,(line+1)->line_end);
 		line->line_size += (line+1)->line_size;
+		cur_index = line->line_end;
 		line->line_end += (line+1)->line_end - 1;
 		deletelem(file.line,file.total_line,sizeof(struct file_line),file.cur_line);
 		file.total_line--;
 		display(file.start_line);
+		line_up();
+		move_to_index(cur_index);
 	}
 	if(dir == DOWN)
 	{
@@ -154,7 +158,7 @@ void mergline(int dir)
 		strncpy(line->character + line->line_end,(line+1)->character + 1,(line+1)->line_end);
 		line->line_size += (line+1)->line_size;
 		line->line_end += (line+1)->line_end - 1;
-		deletelem(file.line,file.total_line,sizeof(struct file_line),file.cur_line);
+		deletelem(file.line,file.total_line,sizeof(struct file_line),file.cur_line+1);
 		file.total_line--;
 		display(file.start_line);
 	}

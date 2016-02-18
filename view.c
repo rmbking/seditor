@@ -517,6 +517,14 @@ void jump_to_end_line()
 			 		clearinbuffer();
 	getpos();
 }
+void move_to_index(int index)
+{
+	move_to_line_head();
+	if(index > file.line[file.cur_line].line_end)
+		exit(-1);
+	while(file.cur_index != index)
+		CursorRight(1);
+}
 int view()
 {
 
