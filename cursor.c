@@ -33,7 +33,7 @@ void CheckCursor()
 	}
 	if(file.line[file.cur_line].character[file.cur_index] == '\t')
 	{
-		screen.cur_col = (screen.cur_col + TABLEN - 1) / TABLEN * TABLEN;	
+		screen.cur_col = (screen.cur_col - screen.start_pos + TABLEN ) / TABLEN * TABLEN + screen.start_pos - 1;	
 	}
 
 	CursorMove();
@@ -173,8 +173,11 @@ void CursorRight(int character)
 	{
 		if(screen.cur_col < screen.win_width)
 		{
-			screen.cur_col++;
-			CURSOR_RIGHT();
+			if(file.line[file.cur_line].character[file.cur_index] == '\t')
+				screen.cur_col = (screen.cur_col - screen.start_pos + TABLEN ) / TABLEN * TABLEN + screen.start_pos;	
+			else
+				screen.cur_col++;
+			CursorMove();
 		}
 		else
 		{

@@ -274,6 +274,249 @@ void display(int start_line)
 	getpos();
 	text_info();
 }
+void line_down()
+{
+	CursorDown(1);
+	clearinbuffer();
+	getpos();
+}
+void line_up()
+{
+	CursorUp(1);
+	clearinbuffer();
+	getpos();
+}
+void word_left()
+{
+	CursorLeft(1);
+	clearinbuffer();
+	getpos();
+}
+void word_right()
+{
+	CursorRight(1);
+	clearinbuffer();
+	getpos();
+}
+void page_down()
+{
+	file.start_line = file.last_line; 
+	display(file.start_line);
+	screen.cur_row = 1;
+	screen.cur_col = screen.start_pos;
+	CursorMove();
+	CheckCursor();
+	getpos();
+ 	clearinbuffer();
+}
+void page_up()
+{
+	int tmp;
+	tmp = file.start_line;
+	if(tmp == 1)
+	{
+		screen.cur_row = 1;
+		screen.cur_col = screen.start_pos;
+		CursorMove();
+		CheckCursor();
+		getpos();
+		return;
+	}
+	file.start_line -= screen.win_height - 1;
+	if(file.start_line <= 0)
+		file.start_line = 1;
+	display(file.start_line);
+	while(file.last_line < tmp)
+	{
+		file.start_line++;
+		display(file.start_line);
+	}
+	screen.cur_row = screen.win_height - 1;
+	screen.cur_col = screen.start_pos;
+	CursorMove();
+	CheckCursor();
+	getpos();
+	clearinbuffer();
+}
+void half_page_up()
+{
+	int tmp;
+	tmp = screen.win_height/2 - 1;
+	file.start_line -= tmp;
+	if(file.start_line <= 1)
+	{
+		file.start_line = 1;
+		display(file.start_line);
+		screen.cur_row = 1;
+		screen.cur_col = screen.start_pos;
+		CursorMove();
+		CheckCursor();
+		getpos();
+		return;
+	}
+	if(tmp > screen.last_row)
+		tmp = screen.last_row;
+	tmp = screen.line[tmp];
+	display(file.start_line);
+	while(file.last_line < tmp)
+	{
+		file.start_line++;
+		display(file.start_line);
+	}
+	screen.cur_row = screen.last_row;
+	screen.cur_col = screen.start_pos;
+	CursorMove();
+	CheckCursor();
+	getpos();
+					/*
+					file.start_line -= screen.win_height/2 - 1;
+					if(file.start_line <= 0)
+						file.start_line = 1;
+					display(file.start_line);
+					screen.cur_row = screen.win_height - 1;
+					screen.cur_col = screen.col_offset;
+					CursorMove();
+					CheckCursor();
+					getpos();
+		 		 	clearinbuffer();
+					*/
+}
+void half_page_down()
+{
+	int tmp;
+
+	tmp = screen.win_height/2 - 1;
+	if(screen.last_row < tmp)
+	{
+		file.start_line = file.total_line;
+		display(file.start_line);
+		screen.cur_row = 1;
+		screen.cur_col = screen.start_pos;
+		CursorMove();
+		CheckCursor();
+		getpos();
+		return;
+	}
+	tmp = screen.line[tmp];
+	file.start_line = tmp;
+	display(file.start_line);
+	screen.cur_row = 1;
+	screen.cur_col = screen.start_pos;
+	CursorMove();
+	CheckCursor();
+	getpos();
+	/*
+	file.start_line += screen.win_height/2 - 1; 
+	if(file.start_line > file.total_line - screen.win_height + 2) 
+			 file.start_line = file.total_line - screen.win_height + 2;
+		display(file.start_line);
+		CURSOR_MOVE(1,screen.col_offset);
+		screen.cur_row = 1;
+		screen.cur_col = screen.col_offset;
+		CheckCursor();
+			 			clearinbuffer();
+	*/
+}
+void move_to_line_head()
+{
+	int tmp;
+
+	tmp = screen.cur_row;
+	tmp = screen.row_rank[tmp] - 1;
+	screen.cur_row -= tmp;	
+	screen.cur_col = screen.start_pos;
+	CursorMove();
+	CheckCursor();
+	getpos();
+}
+void move_to_line_tail()
+{
+	int tmp;
+
+	tmp = screen.cur_row;
+	tmp = screen.line[tmp];
+	tmp = file.line[tmp].line_row - screen.row_rank[screen.cur_row];
+	screen.cur_row += tmp;
+	if(screen.cur_row < screen.win_height)
+	{
+		screen.cur_col = screen.win_width;
+		CursorMove();
+		CheckCursor();
+		getpos();
+		return;
+	}
+	screen.cur_row -= tmp;
+	CursorDown(screen.cur_row + tmp - screen.win_height - 1);
+	CheckCursor();
+	getpos();
+}
+void move_to_page_head()
+{
+	screen.cur_row = 1;
+	screen.cur_col = screen.start_pos;
+	CursorMove();
+	CheckCursor();
+	getpos();
+	clearinbuffer();
+}
+void move_to_page_ass()
+{
+	screen.cur_row = screen.win_height/2;
+	screen.cur_col = screen.start_pos;
+	CursorMove();
+	CheckCursor();
+	getpos();
+	clearinbuffer();
+}
+void move_to_page_tail()
+{
+	screen.cur_row = screen.win_height - 1;
+	screen.cur_col = screen.start_pos;
+	CursorMove();
+	CheckCursor();
+	getpos();
+	clearinbuffer();
+}
+void jump_to_first_line()
+{
+	if(inbuffer.buf[inbuffer.size-1] == 'g')
+	{
+		file.start_line = 1;
+		file.cur_line = 1;
+		display(1);
+		screen.cur_row = 1;
+		screen.cur_col = screen.start_pos;
+		CURSOR_MOVE(1,screen.start_pos);
+		clearinbuffer();
+		return;
+	}
+	addinbuffer('g');
+	getpos();
+}
+void jump_to_end_line()
+{
+	if(file.total_line > screen.win_height - 2)
+	{
+		file.start_line = file.total_line - screen.win_height + 2;
+		display(file.total_line - screen.win_height + 2);
+		while(file.last_line < file.total_line)	//reach the last line.
+		{
+			file.start_line++;
+			display(file.start_line);
+		}
+		file.cur_line = file.total_line;
+	}
+	else
+	{
+		display(1);
+		file.start_line = 1;
+	}
+	screen.cur_row = screen.last_row;
+	screen.cur_col = screen.start_pos;
+	//CURSOR_MOVE(screen.last_row,screen.start_pos);
+			 		clearinbuffer();
+	getpos();
+}
 int view()
 {
 
@@ -328,236 +571,60 @@ int view()
         }
         switch(cmd)
         {
-        	case 'i':return EDIT_MODE;
+        	case 'i':
+					return EDIT_MODE;
 			case ':':
-			 		 clearinbuffer();
-					 return CONTROL_MODE;
+			 		clearinbuffer();
+					return CONTROL_MODE;
 
 			case 'h':
-					 CursorLeft(1);
-			 		 clearinbuffer();
-					 getpos();
-					 break;
+					word_left();
+					break;
 			case 'j':
-					 CursorDown(1);
-			 		 clearinbuffer();
-					 getpos();
+					line_down();
 					 break;
 			case 'k':
-					 	CursorUp(1);
-			 		 clearinbuffer();
-					 getpos();
-					 break;
+					line_up();
+					break;
 			case 'l':
-					 CursorRight(1);
-			 		 clearinbuffer();
-					 getpos();
-					 break;
+					word_right();
+					break;
 			case 'g':
-					if(inbuffer.buf[inbuffer.size-1] == 'g')
-					{
-						file.start_line = 1;
-						file.cur_line = 1;
-						display(1);
-						screen.cur_row = 1;
-						screen.cur_col = screen.start_pos;
-						CURSOR_MOVE(1,screen.start_pos);
-						clearinbuffer();
-						break;
-					}
-					addinbuffer('g');
-					 getpos();
+					jump_to_end_line();
 					break;
 			case 'G':
-					if(file.total_line > screen.win_height - 2)
-					{
-						file.start_line = file.total_line - screen.win_height + 2;
-						display(file.total_line - screen.win_height + 2);
-						while(file.last_line < file.total_line)	//reach the last line.
-						{
-							file.start_line++;
-							display(file.start_line);
-						}
-						file.cur_line = file.total_line;
-					}
-					else
-					{
-						display(1);
-						file.start_line = 1;
-					}
-					screen.cur_row = screen.last_row;
-					screen.cur_col = screen.start_pos;
-					//CURSOR_MOVE(screen.last_row,screen.start_pos);
-			 		clearinbuffer();
-					getpos();
+					jump_to_first_line();
 					break;
 			case Ctl('f'):
-						file.start_line = file.last_line; 
-						display(file.start_line);
-						screen.cur_row = 1;
-						screen.cur_col = screen.start_pos;
-						CursorMove();
-						CheckCursor();
-						getpos();
-					 	
-			 		 	clearinbuffer();
-						break;
+					page_down();
+					break;
 
 			case Ctl('b'):
-						tmp = file.start_line;
-						if(tmp == 1)
-						{
-							screen.cur_row = 1;
-							screen.cur_col = screen.start_pos;
-							CursorMove();
-							CheckCursor();
-							getpos();
-							break;
-						}
-						file.start_line -= screen.win_height - 1;
-						if(file.start_line <= 0)
-							file.start_line = 1;
-						display(file.start_line);
-						while(file.last_line < tmp)
-						{
-							file.start_line++;
-							display(file.start_line);
-						}
-						screen.cur_row = screen.win_height - 1;
-						screen.cur_col = screen.start_pos;
-						CursorMove();
-						CheckCursor();
-						getpos();
-			 			clearinbuffer();
-						break;
-			
+					page_up();
+					break;
+		
 			case Ctl('d'):
-						tmp = screen.win_height/2 - 1;
-						if(screen.last_row < tmp)
-						{
-							file.start_line = file.total_line;
-							display(file.start_line);
-							screen.cur_row = 1;
-							screen.cur_col = screen.start_pos;
-							CursorMove();
-							CheckCursor();
-							getpos();
-							break;
-						}
-						tmp = screen.line[tmp];
-						file.start_line = tmp;
-						display(file.start_line);
-						screen.cur_row = 1;
-						screen.cur_col = screen.start_pos;
-						CursorMove();
-						CheckCursor();
-						getpos();
-						/*
-						file.start_line += screen.win_height/2 - 1; 
-						if(file.start_line > file.total_line - screen.win_height + 2) 
-							 file.start_line = file.total_line - screen.win_height + 2;
-						display(file.start_line);
-						CURSOR_MOVE(1,screen.col_offset);
-						screen.cur_row = 1;
-						screen.cur_col = screen.col_offset;
-						CheckCursor();
-			 			clearinbuffer();
-						*/
-						break;
+					half_page_down();
+					break;
 
 			case Ctl('u'):
-						tmp = screen.win_height/2 - 1;
-						file.start_line -= tmp;
-						if(file.start_line <= 1)
-						{
-							file.start_line = 1;
-							display(file.start_line);
-							screen.cur_row = 1;
-							screen.cur_col = screen.start_pos;
-							CursorMove();
-							CheckCursor();
-							getpos();
-							break;
-						}
-						if(tmp > screen.last_row)
-							tmp = screen.last_row;
-						tmp = screen.line[tmp];
-						display(file.start_line);
-						while(file.last_line < tmp)
-						{
-							file.start_line++;
-							display(file.start_line);
-						}
-						screen.cur_row = screen.last_row;
-						screen.cur_col = screen.start_pos;
-						CursorMove();
-						CheckCursor();
-						getpos();
-						break;
-						/*
-						file.start_line -= screen.win_height/2 - 1;
-						if(file.start_line <= 0)
-							file.start_line = 1;
-						display(file.start_line);
-						screen.cur_row = screen.win_height - 1;
-						screen.cur_col = screen.col_offset;
-						CursorMove();
-						CheckCursor();
-						getpos();
-			 		 	clearinbuffer();
-						*/
-						break;
+					half_page_up();
+					break;
 			case 'H':
-						screen.cur_row = 1;
-						screen.cur_col = screen.start_pos;
-						CursorMove();
-						CheckCursor();
-						getpos();
-						clearinbuffer();
-						break;
+					move_to_page_head();
+					break;
 			case 'M':
-						screen.cur_row = screen.win_height/2;
-						screen.cur_col = screen.start_pos;
-						CursorMove();
-						CheckCursor();
-						getpos();
-						clearinbuffer();
-						break;
+					move_to_page_ass();
+					break;
 			case 'L':
-						screen.cur_row = screen.win_height - 1;
-						screen.cur_col = screen.start_pos;
-						CursorMove();
-						CheckCursor();
-						getpos();
-						clearinbuffer();
-						break;
+					move_to_page_tail();
+					break;
 			case '0':
-						tmp = screen.cur_row;
-						tmp = screen.row_rank[tmp] - 1;
-						screen.cur_row -= tmp;	
-						screen.cur_col = screen.start_pos;
-						CursorMove();
-						CheckCursor();
-						getpos();
-						break;
+					move_to_line_head();
+					break;
 			case '$':
-						tmp = screen.cur_row;
-						tmp = screen.line[tmp];
-						tmp = file.line[tmp].line_row - screen.row_rank[screen.cur_row];
-						screen.cur_row += tmp;
-						if(screen.cur_row < screen.win_height)
-						{
-							screen.cur_col = screen.win_width;
-							CursorMove();
-							CheckCursor();
-							getpos();
-							break;
-						}
-						screen.cur_row -= tmp;
-						CursorDown(screen.cur_row + tmp - screen.win_height - 1);
-						CheckCursor();
-						getpos();
-						break;
+					move_to_line_tail();
+					break;
 
 			/*for debug*/
 			case 's':CursorLocate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
