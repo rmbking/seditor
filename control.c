@@ -100,7 +100,8 @@ int exe_save_or_cancel(const char *cmd,int set)
 	else
 	{
 		if(cmd[1] == '\0')	
-		{	//TODO
+		{	
+			ftob();
 			return VIEW_MODE;
 		}
 		control_info_print("Unknown command:%s",cmd);
