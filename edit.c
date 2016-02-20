@@ -33,16 +33,7 @@ void delete_word()
 	int k;
 	int line = file.cur_line;
 	int index = file.cur_index;
-	if(file.line[file.cur_line].line_end == 1)
-	{
-		deletelem(file.line,file.total_line,sizeof(struct file_line),file.cur_line);
-		file.total_line--;	//TODO:only one line or first line
-		CursorUp(1);
-		display(file.start_line);
-		return;
-	}
-	if(index == 1)	//first word,should not be removed
-		return;
+
 	k = index-1;
 	while(++k <= file.line[line].line_end)
 		file.line[line].character[k-1] = file.line[line].character[k];
@@ -190,7 +181,7 @@ int edit()
 				if(file.cur_index != file.line[file.cur_line].line_end)
 				{
 					CursorRight(1);
-					delete_word(DOWN);
+					delete_word();
 				}
 				else
 					mergline(DOWN);

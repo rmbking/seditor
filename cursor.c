@@ -123,7 +123,7 @@ void CursorLeft(int character)
 	int k;
 	while(file.cur_index > 1 && character > 0)
 	{
-		if(screen.cur_col == screen.start_pos || screen.cur_col < (screen.start_pos + TABLEN - 1) &&  file.line[file.cur_line].character[file.cur_index]== '\t')	
+		if(screen.map[screen.cur_row][screen.start_pos] == file.cur_index)	//the first word of the line
 		{
 			screen.cur_col = screen.win_width;//D:to be extended if direction keys are used since the first row not the fisrt.	
 			screen.cur_row--;
