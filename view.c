@@ -77,10 +77,9 @@ void line_number_list(int flag)
 	file.last_line = line_no-1;
 	
 }
-void state_init()
+void ftob()
 {
 	char word;
-	struct winsize win;
 	static base_line = 1024;
 	static base_line_width = 256;
 	struct file_line char_buf;
@@ -88,9 +87,6 @@ void state_init()
 	int line = 1;
 
 	fseek(FP,0,SEEK_SET);
-	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
-	screen.win_height = win.ws_row;
-	screen.win_width = win.ws_col;
 
 	//the pointer of the memory storing all the pointers of lines.
 	line_buf = (struct file_line *)malloc(base_line * sizeof (struct file_line));
@@ -161,7 +157,16 @@ void state_init()
 	}
 	file.line = line_buf;
 	file.total_line = line;
+}
+void state_init()
+{
+	struct winsize win;
 
+	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
+	screen.win_height = win.ws_row;
+	screen.win_width = win.ws_col;
+
+	ftob();
 	memset(&inbuffer,0,sizeof(inbuffer));
 }
 int digit_len(int number)

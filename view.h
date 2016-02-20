@@ -33,4 +33,5 @@ extern void jump_to_first_line();
 extern void jump_to_end_line();
 
 extern void move_to_index(int index);
+extern void ftob();
 #endif
