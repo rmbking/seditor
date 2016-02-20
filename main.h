@@ -35,6 +35,9 @@
 #define MAX_SCREEN_HEIGHT 100
 #define MAX_SCREEN_WIDTH 200
 #define Ctl(x) (x - 'a' + 1)
+
+#define CUR_WORD	(file.line[file.cur_line].character[file.cur_index])
+
 struct file_line{
 	int line_end;
 	int line_row;

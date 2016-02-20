@@ -163,10 +163,17 @@ void mergline(int dir)
 		display(file.start_line);
 	}
 }
+
 int edit()
 {
 	int word;
 	prompt(1);
+	if('\t' == CUR_WORD)
+		while(screen.cur_col != screen.start_pos && screen.map[screen.cur_row][screen.cur_col] == screen.map[screen.cur_row][screen.cur_col - 1])
+		{
+			screen.cur_col--;
+			CursorMove();
+		}
 	while((word = kb_input()) != '\033')	
 	{
 		switch(word)
@@ -195,6 +202,12 @@ int edit()
 				break;
 		}
 		prompt(1);
+		if('\t' == CUR_WORD)
+			while(screen.cur_col != screen.start_pos && screen.map[screen.cur_row][screen.cur_col] == screen.map[screen.cur_row][screen.cur_col - 1])
+			{
+				screen.cur_col--;
+				CursorMove();
+			}
 	}
 	prompt(0);
 	return VIEW_MODE;
