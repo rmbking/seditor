@@ -85,6 +85,29 @@ int exe_list_number(char *cmd,int set)
 		return VIEW_MODE;
 	}
 }
+int exe_save_or_cancel(const char *cmd,int set)
+{
+	if(set)
+	{
+		if(cmd[1] == '\0')
+		{
+			btof(FP);
+			return VIEW_MODE;
+		}
+		control_info_print("Unknown command:%s",cmd);
+		return VIEW_MODE;
+	}
+	else
+	{
+		if(cmd[1] == '\0')	
+		{	//TODO
+			return VIEW_MODE;
+		}
+		control_info_print("Unknown command:%s",cmd);
+		return VIEW_MODE;
+	}
+	
+}
 int control()
 {
 	char cmd[100];
@@ -101,11 +124,15 @@ int control()
 			return exe_quit(cmd);
 		case 'n':
 			return exe_list_number(cmd,1);
+		case 'w':
+			return exe_save_or_cancel(cmd,1);
 		case '!':
 			switch(cmd[1])
 			{
 				case 'n':
 					return exe_list_number(cmd+1,0);	
+				case 'w':
+					return exe_save_or_cancel(cmd+1,1);
 				default:
 					control_info_print("Unknown command:%s",cmd);
 					return VIEW_MODE;
