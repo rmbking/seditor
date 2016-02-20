@@ -1,4 +1,3 @@
-backspace to the first line and bug exits. 
 should be able to edit a new file.
 reserve to the original file.
 auto realloc memroty when any line is too long or file is too large.

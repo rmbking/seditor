@@ -131,6 +131,8 @@ void mergline(int dir)
 	int cur_index;
 	if(dir == UP)
 	{
+		if(file.cur_line == 1)
+			return;
 		line = file.line+(file.cur_line - 1);
 		line->character = (char *)realloc(line->character,lengthof(*line)+ lengthof(*(line+1)));
 		strncpy(line->character + line->line_end,(line+1)->character + 1,(line+1)->line_end);
@@ -145,6 +147,8 @@ void mergline(int dir)
 	}
 	if(dir == DOWN)
 	{
+		if(file.cur_line == file.total_line)
+			return;
 		line = file.line + file.cur_line;
 		line->character = (char *)realloc(line->character,lengthof(*line)+ lengthof(*(line+1)));
 		strncpy(line->character + line->line_end,(line+1)->character + 1,(line+1)->line_end);
