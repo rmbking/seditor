@@ -50,6 +50,7 @@ void delete_word()
 	screen.row_end[screen.cur_row]--;
 	CursorLeft(1);
 	display(file.start_line);
+	move_to_index(index - 1);
 }
 void insert_word(char c)
 {
@@ -168,6 +169,7 @@ int edit()
 {
 	int word;
 	prompt(1);
+	/*move the cursor to the most left position of the TAb when editing*/
 	if('\t' == CUR_WORD)
 		while(screen.cur_col != screen.start_pos && screen.map[screen.cur_row][screen.cur_col] == screen.map[screen.cur_row][screen.cur_col - 1])
 		{

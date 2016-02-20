@@ -1,2 +1,4 @@
-replace TAB when editing
 after some backspacing,cursor move right?may be related with initial tab of next line.
+should be able to edit a new file.
+reserve to the original file.
+auto realloc memroty when any line is too long or file is too large.
