@@ -598,10 +598,10 @@ int view()
 					word_right();
 					break;
 			case 'g':
-					jump_to_end_line();
+					jump_to_first_line();
 					break;
 			case 'G':
-					jump_to_first_line();
+					jump_to_end_line();
 					break;
 			case Ctl('f'):
 					page_down();
