@@ -78,7 +78,7 @@ void check(int *mode,char * path)
 		}
 	}
 	
-	if(file_info_p->st_size == 0)	
+	if(file_info_p->st_size <= 1)	//????????????????????????????????	
 	{
 		*mode = NEW;
 		return;
@@ -177,22 +177,20 @@ int main(int argc,char *argv[])
 	if(mode == BOTH || mode ==NEW)
 	{
 		OFP = fopen(path,"w+");	//r+ cannot open a new file.
-		if(mode == NEW)
-		{
-			system("touch did");
-			fputc('\n',OFP);
-			system("touch notdid");
-			fflush(OFP);
-		}
 		path = strcat(path,"_tmp");
 		FP = fopen(path,"w+");
 		fcopy(FP,OFP);
+		if(mode == NEW)
+		{
+			fputc('\n',FP);
+			fflush(FP);
+		}
 	}
 	file.open_mode = mode;
 	
 	clear_screen();	
 	process();
-	btof(FP);
+	fcopy(OFP,FP);
 	fclose(OFP);
 	fclose(FP);
 //	frm(path);
