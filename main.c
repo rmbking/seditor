@@ -78,6 +78,12 @@ void check(int *mode,char * path)
 		}
 	}
 	
+	if(file_info_p->st_size == 0)	
+	{
+		*mode = NEW;
+		return;
+	}
+
 	if(!S_ISREG(file_info_p->st_mode)){
 
 		printf("%s is not a regular file.\n",path);
@@ -110,6 +116,7 @@ void process()
 void fcopy(FILE *tfp,FILE *sfp)
 {
 	char word;
+	fseek(sfp,0,SEEK_SET);
 	while((word = fgetc(sfp)) != EOF)
 		fputc(word,tfp);
 }
@@ -169,7 +176,14 @@ int main(int argc,char *argv[])
 
 	if(mode == BOTH || mode ==NEW)
 	{
-		OFP = fopen(path,"r+");
+		OFP = fopen(path,"w+");	//r+ cannot open a new file.
+		if(mode == NEW)
+		{
+			system("touch did");
+			fputc('\n',OFP);
+			system("touch notdid");
+			fflush(OFP);
+		}
 		path = strcat(path,"_tmp");
 		FP = fopen(path,"w+");
 		fcopy(FP,OFP);
