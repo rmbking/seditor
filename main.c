@@ -174,17 +174,21 @@ int main(int argc,char *argv[])
 		fcopy(FP,OFP);
 	}
 
-	if(mode == BOTH || mode ==NEW)
+	if(mode == BOTH)
 	{
-		OFP = fopen(path,"w+");	//r+ cannot open a new file.
+		OFP = fopen(path,"r+");	//r+ cannot create and truncate
 		path = strcat(path,"_tmp");
 		FP = fopen(path,"w+");
 		fcopy(FP,OFP);
-		if(mode == NEW)
-		{
-			fputc('\n',FP);
-			fflush(FP);
-		}
+	}
+	if(mode == NEW)
+	{
+		OFP = fopen(path,"w+");	//w+ can truncated and create a new file. 
+		path = strcat(path,"_tmp");
+		FP = fopen(path,"w+");
+		fcopy(FP,OFP);
+		fputc('\n',FP);
+		fflush(FP);
 	}
 	file.open_mode = mode;
 	
