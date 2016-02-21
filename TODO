@@ -1,1 +1,3 @@
-auto realloc memroty when any line is too long or file is too large.
+bugs when writing the last line.
+bugs auto realloc memory when any line is too long or file is too large.
+automatically redisplay when window resized.

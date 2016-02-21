@@ -52,6 +52,7 @@ struct file{
 	int last_line;
 	int cur_line;
 	int cur_index;
+	int size;
 	struct file_line *line;
 };
 struct screen{

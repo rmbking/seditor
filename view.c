@@ -80,8 +80,8 @@ void line_number_list(int flag)
 void ftob()
 {
 	char word;
-	static base_line = 1024;
-	static base_line_width = 256;
+	static int base_line = 1024;
+	static int base_line_width = 256;
 	struct file_line char_buf;
 	struct file_line *line_buf;
 	int line = 1;
@@ -130,7 +130,8 @@ void ftob()
 			line_buf[line++] = char_buf;
 			if(line >= base_line)
 			{
-				base_line *= 2;
+				file.size *= 2;
+				base_line = file.size * 1024;
 				line_buf = (struct file_line *)realloc(line_buf,base_line * sizeof (struct file_line));
 				if(char_buf.character  == NULL)
 				{
@@ -165,7 +166,7 @@ void state_init()
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
 	screen.win_height = win.ws_row;
 	screen.win_width = win.ws_col;
-
+	file.size = 1;
 	ftob();
 	memset(&inbuffer,0,sizeof(inbuffer));
 }
