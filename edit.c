@@ -192,7 +192,6 @@ int edit()
 				break;
 			case '\n':
 				divline();
-				system("touch success");
 				break;
 			default:
 				insert_word(word);
@@ -207,5 +206,6 @@ int edit()
 			}
 	}
 	prompt(0);
+	screen.view_mode &= ~SYNC;
 	return VIEW_MODE;
 }

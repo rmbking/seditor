@@ -54,12 +54,31 @@ void input(char *cmd)
 	*pos = '\0';
 
 }
-int exe_quit(char *cmd)
+int exe_quit(char *cmd,int set)
 {
-	if(cmd[1] == '\0')
-		return EXIT;
-	control_info_print("Unknown command:%s",cmd);
-	return VIEW_MODE;
+	if(set)
+	{
+		if(cmd[1] == '\0')
+			if(screen.view_mode & SYNC)
+				return EXIT;
+			else
+			{
+				control_info_print("file should be saved first or you can use '!q' to forcely quit");
+				return VIEW_MODE;
+			}
+		else
+		{
+			control_info_print("Unknown command:%s",cmd);
+			return VIEW_MODE;
+		}
+	}
+	else
+	{
+		if(cmd[1] == '\0')
+			return EXIT;
+		control_info_print("Unknown command:%s",cmd-1);
+		return VIEW_MODE;
+	}
 }
 int exe_list_number(char *cmd,int set)
 {
@@ -71,7 +90,7 @@ int exe_list_number(char *cmd,int set)
 			screen.view_mode |= LINESHOW;
 			return VIEW_MODE;
 		}
-		control_info_print("Unknown command:%s",cmd);
+		control_info_print("Unknown command:%s",cmd-1);
 		return VIEW_MODE;
 	}
 	else
@@ -81,7 +100,7 @@ int exe_list_number(char *cmd,int set)
 			screen.view_mode &= ~LINESHOW;
 			return VIEW_MODE;
 		}
-		control_info_print("Unknown command:%s",cmd);
+		control_info_print("Unknown command:%s",cmd-1);
 		return VIEW_MODE;
 	}
 }
@@ -92,6 +111,7 @@ int exe_save_or_cancel(const char *cmd,int set)
 		if(cmd[1] == '\0')
 		{
 			btof(FP);
+			screen.view_mode |= SYNC;
 			return VIEW_MODE;
 		}
 		control_info_print("Unknown command:%s",cmd);
@@ -101,10 +121,10 @@ int exe_save_or_cancel(const char *cmd,int set)
 	{
 		if(cmd[1] == '\0')	
 		{	
-			ftob();
+			ftob();				//TODO,not ready to work
 			return VIEW_MODE;
 		}
-		control_info_print("Unknown command:%s",cmd);
+		control_info_print("Unknown command:%s",cmd-1);
 		return VIEW_MODE;
 	}
 	
@@ -116,13 +136,8 @@ int control()
 	input(cmd);
 	switch(cmd[0])
 	{
-		/*
-		case 'w':
-			printf("%d %d ",screen.win_height,screen.win_width);
-			break;
-			*/
 		case 'q':
-			return exe_quit(cmd);
+			return exe_quit(cmd,1);
 		case 'n':
 			return exe_list_number(cmd,1);
 		case 'w':
@@ -130,10 +145,12 @@ int control()
 		case '!':
 			switch(cmd[1])
 			{
+				case 'q':
+					return exe_quit(cmd+1,0);
 				case 'n':
 					return exe_list_number(cmd+1,0);	
 				case 'w':
-					return exe_save_or_cancel(cmd+1,1);
+					return exe_save_or_cancel(cmd+1,0);
 				default:
 					control_info_print("Unknown command:%s",cmd);
 					return VIEW_MODE;

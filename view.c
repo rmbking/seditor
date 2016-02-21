@@ -640,6 +640,7 @@ int view()
 					break;
 
 			/*for debug*/
+			/*
 			case 's':CursorLocate(&row,&col);printf("%d %d ",row,col);fflush(stdout);	break;
 			case 'w':printf("%d %d ",screen.row_offset,screen.col_offset);fflush(stdout);break;
 			case 't':printf("%d ",file.total_line);fflush(stdout);break;
@@ -662,6 +663,7 @@ int view()
 						 else 
 						 putchar(file.line[screen.cur_row-1].character[i]);
 					 break;
+					*/
 			/*for debug*/
             default:
 					 addinbuffer(cmd);

@@ -117,6 +117,8 @@ void fcopy(FILE *tfp,FILE *sfp)
 {
 	char word;
 	fseek(sfp,0,SEEK_SET);
+	fseek(tfp,0,SEEK_SET);
+	ftruncate(fileno(tfp),0);
 	while((word = fgetc(sfp)) != EOF)
 		fputc(word,tfp);
 }

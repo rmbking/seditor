@@ -29,8 +29,9 @@
 #define TABLEN 4
 #define BUFLEN 10
 
-#define LINESHOW  01
-#define MODIFIED  02
+#define LINESHOW  	01
+#define MODIFIED  	02
+#define SYNC		04	
 
 #define MAX_SCREEN_HEIGHT 100
 #define MAX_SCREEN_WIDTH 200
