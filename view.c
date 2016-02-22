@@ -164,6 +164,7 @@ void state_init()
 	struct winsize win;
 
 	ioctl(STDIN_FILENO,TIOCGWINSZ,&win);
+	screen.view_mode |= SYNC;
 	screen.win_height = win.ws_row;
 	screen.win_width = win.ws_col;
 	file.size = 1;
