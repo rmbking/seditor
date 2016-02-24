@@ -199,7 +199,7 @@ int main(int argc,char *argv[])
 	fcopy(OFP,FP);
 	fclose(OFP);
 	fclose(FP);
-//	frm(path);
+	frm(path);
 	clear_screen();
 	return 0;
 }

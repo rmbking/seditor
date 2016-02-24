@@ -1,3 +1,5 @@
 bugs auto realloc memory when any line is too long or file is too large.
 automatically redisplay when window resized.
 direction-key like <- and -> 
+'a' 'o' 
+^@,show the control characters.
